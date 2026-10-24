@@ -1,26 +1,96 @@
 // 疾风行者 · 舞台（Game）
-// 全局状态 + 事件处理（M2 骨架）
+// 状态机：menu / playing / paused / dead
+// UI 消息：uiMenu / uiPlay / uiPause / uiGameOver
 
 var (
-	score int
-	best  int
+	score     int
+	best      int
+	lives     int
+	gameSpeed float64
+	slowMul   float64
+	state     string
+	elapsed   int
 )
 
 onStart => {
 	score = 0
 	best = 0
-	println "疾风行者 · 开始"
+	lives = 3
+	gameSpeed = 1
+	slowMul = 1
+	elapsed = 0
+	state = "menu"
+	broadcast "uiMenu"
+	// 计时 + 难度递增
+	for {
+		wait 1
+		if state == "playing" {
+			elapsed = elapsed + 1
+			gameSpeed = gameSpeed + 0.08
+			if gameSpeed > 3.5 {
+				gameSpeed = 3.5
+			}
+		}
+	}
+}
+
+onMsg "start", => {
+	if state == "menu" {
+		score = 0
+		lives = 3
+		elapsed = 0
+		gameSpeed = 1
+		slowMul = 1
+		state = "playing"
+		broadcast "uiPlay"
+	}
+}
+
+onMsg "restart", => {
+	score = 0
+	lives = 3
+	elapsed = 0
+	gameSpeed = 1
+	slowMul = 1
+	state = "playing"
+	broadcast "uiPlay"
+}
+
+onMsg "pause", => {
+	if state == "playing" {
+		state = "paused"
+		broadcast "uiPause"
+	} else if state == "paused" {
+		state = "playing"
+		broadcast "uiPlay"
+	}
+}
+
+onMsg "toMenu", => {
+	state = "menu"
+	broadcast "uiMenu"
 }
 
 onMsg "coin", => {
-	score++
-	printf "得分：%d\n", score
+	if state == "playing" {
+		score++
+		if score > best {
+			best = score
+		}
+	}
 }
 
 onMsg "hit", => {
-	if score > best {
-		best = score
+	if state == "playing" {
+		lives = lives - 1
+		if lives <= 0 {
+			lives = 0
+			state = "dead"
+			broadcast "uiGameOver"
+		} else {
+			slowMul = 0.35
+			wait 1
+			slowMul = 1
+		}
 	}
-	printf "撞到障碍！本局：%d，最高：%d\n", score, best
-	score = 0
 }

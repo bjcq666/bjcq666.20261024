@@ -1,0 +1,24 @@
+// 疾风行者 · 开始菜单（Start）
+
+onStart => {
+	setXYpos 0, 0
+}
+
+onMsg "uiMenu", => {
+	setLayer Front
+	show
+}
+
+onMsg "uiPlay", => {
+	hide
+}
+
+onMsg "uiGameOver", => {
+	hide
+}
+
+onClick => {
+	if state == "menu" {
+		broadcast "start"
+	}
+}

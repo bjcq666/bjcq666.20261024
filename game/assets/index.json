@@ -17,6 +17,10 @@
 		"mode": "fillRatio"
 	},
 	"physics": false,
+	"layerSortMode": "",
+	"autoSetCollisionLayer": true,
+	"audioAttenuation": 0,
+	"audioMaxDistance": 768,
 	"run": {
 		"width": 480,
 		"height": 360
@@ -24,10 +28,58 @@
 	"camera": {
 		"on": ""
 	},
+	"stretchMode": true,
+	"windowScale": 2,
 	"zorder": [
+		{
+			"type": "monitor",
+			"name": "score",
+			"size": 1,
+			"target": "",
+			"val": "getVar:score",
+			"color": 15629590,
+			"label": "分数",
+			"mode": 1,
+			"x": -210,
+			"y": 170,
+			"visible": true
+		},
+		{
+			"type": "monitor",
+			"name": "time",
+			"size": 1,
+			"target": "",
+			"val": "getVar:elapsed",
+			"color": 15629590,
+			"label": "时间",
+			"mode": 1,
+			"x": -30,
+			"y": 170,
+			"visible": true
+		},
+		{
+			"type": "monitor",
+			"name": "lives",
+			"size": 1,
+			"target": "",
+			"val": "getVar:lives",
+			"color": 15629590,
+			"label": "生命",
+			"mode": 1,
+			"x": 170,
+			"y": 170,
+			"visible": true
+		},
 		"Obstacle",
 		"Coin",
+		"Start",
+		"Gameover",
+		"Pause",
 		"Player"
 	],
-	"maxFPS": 60
+	"maxFPS": 60,
+	"fontPreferences": [
+		"basic-chinese",
+		"default"
+	]
 }

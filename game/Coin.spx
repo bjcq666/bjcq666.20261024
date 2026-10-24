@@ -1,11 +1,13 @@
 // 疾风行者 · 能量（Coin）
-// 循环克隆、向左移动、碰到玩家收集
+// 仅在 playing 状态生成与移动；暂停时冻结
 
 onStart => {
 	hide
 	for {
 		wait 2
-		clone
+		if state == "playing" {
+			clone
+		}
 	}
 }
 
@@ -14,13 +16,15 @@ onCloned => {
 	show
 	for {
 		wait 0.02
-		changeXpos -9
-		if touching("Player") {
-			broadcast "coin"
-			destroy
-		}
-		if xpos < -260 {
-			destroy
+		if state == "playing" {
+			changeXpos -9 * gameSpeed * slowMul
+			if touching("Player") {
+				broadcast "coin"
+				destroy
+			}
+			if xpos <= -230 {
+				destroy
+			}
 		}
 	}
 }

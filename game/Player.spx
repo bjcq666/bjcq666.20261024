@@ -1,8 +1,9 @@
 // 疾风行者 · 主角（Player）
-// 跳跃 / 滑铲 / 碰撞检测
+// 跳跃 / 滑铲 / 碰撞扣命 + 1 秒无敌闪烁 / 菜单与暂停控制
 
 var (
-	onGround bool
+	onGround   bool
+	invincible bool
 )
 
 func jump() {
@@ -26,26 +27,70 @@ func slide() {
 	setSize 0.6
 }
 
+func blink() {
+	for i := 0; i < 10; i++ {
+		hide
+		wait 0.05
+		show
+		wait 0.05
+	}
+}
+
 onStart => {
 	onGround = true
+	invincible = false
 	setXYpos -150, -100
 	for {
 		wait 0.02
-		if touching("Obstacle") {
+		if state == "playing" && !invincible && touching("Obstacle") {
+			invincible = true
 			broadcast "hit"
-			wait 1
+			blink
+			invincible = false
 		}
 	}
 }
 
 onKey KeySpace, => {
-	jump
+	if state == "menu" {
+		broadcast "start"
+	} else if state == "playing" {
+		jump
+	}
 }
 
 onKey KeyUp, => {
-	jump
+	if state == "playing" {
+		jump
+	}
 }
 
 onKey KeyDown, => {
-	slide
+	if state == "playing" {
+		slide
+	}
+}
+
+onKey KeyEscape, => {
+	if state == "playing" || state == "paused" {
+		broadcast "pause"
+	}
+}
+
+onKey KeyQ, => {
+	if state == "paused" {
+		broadcast "toMenu"
+	}
+}
+
+onKey KeyR, => {
+	if state == "dead" {
+		broadcast "restart"
+	}
+}
+
+onKey KeyM, => {
+	if state == "dead" {
+		broadcast "toMenu"
+	}
 }
