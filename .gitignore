@@ -1,3 +1,15 @@
+# 运行时产物（spx 运行缓存，不提交）
+game/.temp/
+*.xbp
+*.xbp.zip
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 构建产物
+build/
+dist/
 # Logs
 logs
 *.log

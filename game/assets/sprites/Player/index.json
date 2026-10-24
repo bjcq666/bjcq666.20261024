@@ -1,0 +1,26 @@
+{
+	"heading": 90,
+	"x": -150,
+	"y": -100,
+	"size": 0.6,
+	"rotationStyle": "left-right",
+	"physicsMode": "no",
+	"costumeIndex": 0,
+	"visible": true,
+	"isDraggable": false,
+	"collisionPivot": {"x": 0, "y": 0},
+	"collisionShapeType": "none",
+	"collisionShapeParams": [],
+	"costumes": [
+		{
+			"x": 50,
+			"y": 50,
+			"faceRight": 0,
+			"bitmapResolution": 1,
+			"name": "idle",
+			"path": "Player.svg",
+			"imageWidth": 100,
+			"imageHeight": 100
+		}
+	]
+}

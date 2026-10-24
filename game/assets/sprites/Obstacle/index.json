@@ -1,0 +1,26 @@
+{
+	"heading": 90,
+	"x": 300,
+	"y": -100,
+	"size": 0.8,
+	"rotationStyle": "normal",
+	"physicsMode": "no",
+	"costumeIndex": 0,
+	"visible": false,
+	"isDraggable": false,
+	"collisionPivot": {"x": 0, "y": 0},
+	"collisionShapeType": "none",
+	"collisionShapeParams": [],
+	"costumes": [
+		{
+			"x": 30,
+			"y": 30,
+			"faceRight": 0,
+			"bitmapResolution": 1,
+			"name": "default",
+			"path": "Obstacle.svg",
+			"imageWidth": 60,
+			"imageHeight": 60
+		}
+	]
+}

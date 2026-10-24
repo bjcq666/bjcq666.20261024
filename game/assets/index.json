@@ -1,0 +1,33 @@
+{
+	"backdrops": [
+		{
+			"x": 240,
+			"y": 180,
+			"bitmapResolution": 1,
+			"name": "neon",
+			"path": "backdrop.svg",
+			"imageWidth": 480,
+			"imageHeight": 360
+		}
+	],
+	"backdropIndex": 0,
+	"map": {
+		"width": 480,
+		"height": 360,
+		"mode": "fillRatio"
+	},
+	"physics": false,
+	"run": {
+		"width": 480,
+		"height": 360
+	},
+	"camera": {
+		"on": ""
+	},
+	"zorder": [
+		"Obstacle",
+		"Coin",
+		"Player"
+	],
+	"maxFPS": 60
+}

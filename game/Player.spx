@@ -1,0 +1,51 @@
+// 疾风行者 · 主角（Player）
+// 跳跃 / 滑铲 / 碰撞检测
+
+var (
+	onGround bool
+)
+
+func jump() {
+	if onGround {
+		onGround = false
+		for i := 0; i < 9; i++ {
+			changeYpos 14
+			wait 0.02
+		}
+		for i := 0; i < 9; i++ {
+			changeYpos -14
+			wait 0.02
+		}
+		onGround = true
+	}
+}
+
+func slide() {
+	setSize 0.35
+	wait 0.35
+	setSize 0.6
+}
+
+onStart => {
+	onGround = true
+	setXYpos -150, -100
+	for {
+		wait 0.02
+		if touching("Obstacle") {
+			broadcast "hit"
+			wait 1
+		}
+	}
+}
+
+onKey KeySpace, => {
+	jump
+}
+
+onKey KeyUp, => {
+	jump
+}
+
+onKey KeyDown, => {
+	slide
+}

@@ -1,0 +1,26 @@
+// 疾风行者 · 舞台（Game）
+// 全局状态 + 事件处理（M2 骨架）
+
+var (
+	score int
+	best  int
+)
+
+onStart => {
+	score = 0
+	best = 0
+	println "疾风行者 · 开始"
+}
+
+onMsg "coin", => {
+	score++
+	printf "得分：%d\n", score
+}
+
+onMsg "hit", => {
+	if score > best {
+		best = score
+	}
+	printf "撞到障碍！本局：%d，最高：%d\n", score, best
+	score = 0
+}

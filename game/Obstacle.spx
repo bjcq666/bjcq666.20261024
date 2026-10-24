@@ -1,0 +1,22 @@
+// 疾风行者 · 障碍（Obstacle）
+// 原始精灵循环克隆；克隆体向左移动、出屏回收
+
+onStart => {
+	hide
+	for {
+		wait 1.6
+		clone
+	}
+}
+
+onCloned => {
+	setXYpos 260, -100
+	show
+	for {
+		wait 0.02
+		changeXpos -9
+		if xpos < -260 {
+			destroy
+		}
+	}
+}
