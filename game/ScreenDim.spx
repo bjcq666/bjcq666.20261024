@@ -12,9 +12,7 @@ onStart => {
         // while the camera flies from one end of the level to the other.
         left, top, width, height := Camera.viewportRect()
         setXYpos left + width / 2 + wipeX, -top - height / 2
-        // veilScale is 3 while the camera flies (a one-frame placement error is
-        // then still far inside the sheet) and back to 1 for the slide itself.
-        setSize veilScale / cameraZoom
+        setSize 1 / cameraZoom
         if dimOpacity > 0.1 {
             setGraphicEffect GhostEffect, 100 - dimOpacity
             show

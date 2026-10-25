@@ -26,7 +26,6 @@ var (
     dimOpacity float64
     menuOpacity float64
     wipeX float64
-    veilScale = 1.0
     maskUp bool
     hudShown = true  // the monitor starts visible (assets/index.json)
     shakeTicks int
@@ -69,34 +68,54 @@ func updateCamera() {
 //     target the camera is still flying to; their gap is the remaining flight.
 //   * a sprite placed from viewportRect() is exactly one frame behind the camera,
 //     so during a fast flight it visibly bounces.
-// Hence: nothing may be on screen while the camera flies fast, and the veil
-// must be oversized for that phase.
+// Hence: the camera must never move fast while anything is visible. A big
+// teleport is therefore split into small hops (see glideCameraHome).
 // ---------------------------------------------------------------------------
-
-// Oversized veil for the camera-flight phase: it is placed from last frame's
-// position, so it needs slack or the stage peeks past its edge for a few frames.
-func veilThick() {
-    veilScale = 3.0
-}
-
-func veilThin() {
-    veilScale = 1.0
-}
 
 // Hold until the camera has finished its glide, so that whatever is revealed
 // afterwards shows a still world. The gap decays ~16% per tick, so this settles
 // in well under a second; the cap only guards a pathological case.
 func waitCameraStill() {
     settled := false
-    for i := 0; i < 120 && !settled; i++ {
+    for i := 0; i < 160 && !settled; i++ {
         left, _, width, _ := Camera.viewportRect()
-        gap := left + width / 2 - Camera.xpos
-        if gap < 12 && gap > -12 {
+        // 目标位置直接由玩家位置推出来，不依赖 Camera.xpos 的语义
+        target := Player.xpos + 80 / cameraZoom
+        gap := left + width / 2 - target
+        if gap < 16 && gap > -16 {
             settled = true
         } else {
             wait 0.02
         }
     }
+}
+
+// Put the camera back on the player without any big single jump.
+//
+// 相机每帧只追平剩余距离的约 16%，所以一次跳 13000px 时第一帧就会位移 2000+px。
+// 黑罩比视口宽出来的余量只有约 790px，而它是"上一帧"的位置，一帧错位就会漏出舞台。
+// 因此这里把目标分成 ≤2200px 的若干跳，每跳后等 0.1s 让相机追上一点：
+// 单帧位移被压在 400px 以内，远小于余量，整段重新定位都不会露馅。
+func glideCameraHome() {
+    done := false
+    for i := 0; i < 14 && !done; i++ {
+        left, _, width, _ := Camera.viewportRect()
+        center := left + width / 2
+        target := Player.xpos + 80 / cameraZoom
+        gap := target - center
+        if gap < 2200 && gap > -2200 {
+            done = true
+        } else {
+            if gap > 0 {
+                Camera.setXYpos center + 2200, 0
+            } else {
+                Camera.setXYpos center - 2200, 0
+            }
+            wait 0.1
+        }
+    }
+    updateCamera
+    waitCameraStill
 }
 
 // Rebuild the arena. Only ever called while the veil fully covers the stage.
@@ -131,7 +150,6 @@ func syncHUD() {
 func maskIn() {
     if maskUp { return }
     maskUp = true
-    veilThin
     wipeX = -2600
     dimOpacity = 100
     for i := 0; i < 13; i++ {
@@ -148,7 +166,6 @@ func maskIn() {
 // clean instead of popping.
 func maskOut() {
     maskUp = false
-    veilThin
     wipeX = 0
     for i := 0; i < 13; i++ {
         wipeX = wipeX + 200
@@ -209,13 +226,9 @@ func resumePlay(rebuild bool) {
     activeMenu = ""
     broadcast "syncMenu"
     if rebuild {
-        veilThick
-        wait 0.06
         resetStage
-        waitCameraStill
+        glideCameraHome
     }
-    veilThin
-    wait 0.06
     maskOut
     state = "playing"
     syncHUD
