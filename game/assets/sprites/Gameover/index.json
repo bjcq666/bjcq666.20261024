@@ -2,28 +2,20 @@
   "heading": 90,
   "x": 0,
   "y": 0,
-  "size": 1.6666666666666667,
+  "size": 1,
   "rotationStyle": "normal",
   "physicsMode": "no",
-  "costumeIndex": 0,
   "visible": false,
-  "isDraggable": false,
-  "collisionPivot": {
-    "x": 0,
-    "y": 0
-  },
-  "collisionShapeType": "none",
-  "collisionShapeParams": [],
+  "costumeIndex": 0,
   "costumes": [
     {
+      "name": "panel",
+      "path": "panel.svg",
       "x": 240,
-      "y": 180,
-      "faceRight": 0,
+      "y": 150,
       "bitmapResolution": 1,
-      "name": "default",
-      "path": "Gameover.png",
       "imageWidth": 480,
-      "imageHeight": 360
+      "imageHeight": 300
     }
   ]
 }

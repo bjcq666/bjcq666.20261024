@@ -27,7 +27,7 @@ func resetPlayer() {
     jumpsUsed = 0
     jumpHeld = keyPressed(KeyUp) || keyPressed(KeySpace)
     setHeading Left
-    setXYpos -250, -208.3333333333
+    setXYpos levelStart, groundY
     setCostume idleFrames[0]
 }
 
@@ -55,30 +55,62 @@ onStart => {
             // 只响应按下沿：必须松开再按，长按不消耗两次机会。
             if jumpNow && !jumpHeld { startJump }
             if keyPressed(KeyRight) {
-                vx = 8
+                vx = 14
                 setHeading Left
             } else if keyPressed(KeyLeft) {
-                vx = -8
+                vx = -14
                 setHeading Right
             } else if onGround {
                 vx = 0
             }
             // 原素材默认朝左：负 heading 对应朝右，正 heading 对应朝左。
             // 无方向输入时，保留空中水平惯性；站在地面则停下。
-            changeXpos vx
-            vy = vy - 1.2
-            changeYpos vy
-            if ypos <= -208.3333333333 {
-                if !onGround {
-                    landingTicks = 1
+            oldX := xpos
+            oldY := ypos
+            nextX := oldX + vx
+            // 水平扫掠：碰到高台侧壁时贴边，不穿墙或自动爬台。
+            for i := 0; i < len(blockLeft); i++ {
+                if oldY < blockTop[i] - 0.1 && oldY + playerHeight > -300 {
+                    if vx > 0 && oldX + playerHalfWidth <= blockLeft[i] + 0.1 && nextX + playerHalfWidth > blockLeft[i] {
+                        nextX = blockLeft[i] - playerHalfWidth
+                    }
+                    if vx < 0 && oldX - playerHalfWidth >= blockRight[i] - 0.1 && nextX - playerHalfWidth < blockRight[i] {
+                        nextX = blockRight[i] + playerHalfWidth
+                    }
                 }
-                setYpos -208.3333333333
+            }
+            if nextX < levelStart { nextX = levelStart }
+            if nextX > levelStart + float64(levelLength) { nextX = levelStart + float64(levelLength) }
+            setXpos nextX
+            vy = vy - 1.2
+            nextY := oldY + vy
+            landed := false
+            if vy <= 0 {
+                for i := 0; i < len(blockLeft); i++ {
+                    if nextX + playerHalfWidth > blockLeft[i] && nextX - playerHalfWidth < blockRight[i] && oldY >= blockTop[i] - 0.1 && nextY <= blockTop[i] {
+                        nextY = blockTop[i]
+                        landed = true
+                    }
+                }
+            }
+            setYpos nextY
+            if landed {
+                if !onGround { landingTicks = 1 }
                 vy = 0
                 onGround = true
                 jumpsUsed = 0
             } else {
                 onGround = false
             }
+            if ypos < deathY {
+                health = 0
+                lives = 0
+                openMenu "dead"
+            }
+            distance = int(xpos - levelStart)
+            score = distance
+            updateCamera
+            if distance >= levelLength { broadcast "finish" }
             if !onGround {
                 // 约 36 个模拟帧覆盖一次飞行，依次走完源帧 1..21。
                 index := airTicks * 21 / 36
@@ -116,10 +148,7 @@ onStart => {
     }
 }
 
-onMsg "restart", => { resetPlayer }
-onMsg "start", => {
-    if state == "menu" || state == "playing" { resetPlayer }
-}
+onMsg "resetPlayer", => { resetPlayer }
 onKey KeySpace, => {
     if state == "menu" { broadcast "start" }
 }
@@ -130,8 +159,8 @@ onKey KeyQ, => {
     if state == "paused" { broadcast "toMenu" }
 }
 onKey KeyR, => {
-    if state == "dead" { broadcast "restart" }
+    if state == "dead" || state == "won" { broadcast "restart" }
 }
 onKey KeyM, => {
-    if state == "dead" { broadcast "toMenu" }
+    if state == "dead" || state == "won" { broadcast "toMenu" }
 }

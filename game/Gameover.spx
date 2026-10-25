@@ -1,19 +1,14 @@
-// 疾风行者 · 游戏结束界面（Gameover）
-
+// Panel opacity controlled centrally; no abrupt show/hide message races.
 onStart => {
-	setXYpos 0, 0
-	hide
-}
-
-onMsg "uiGameOver", => {
-	setLayer Front
-	show
-}
-
-onMsg "uiPlay", => {
-	hide
-}
-
-onMsg "uiMenu", => {
-	hide
+    hide
+    for {
+        wait 0.02
+        left, top, width, height := Camera.viewportRect()
+        setXYpos left + width / 2, -top - height / 2
+        setSize 1.3 / cameraZoom
+        if activeMenu == "won" || activeMenu == "dead" {
+            setGraphicEffect GhostEffect, 100 - menuOpacity
+            show
+        } else { hide }
+    }
 }

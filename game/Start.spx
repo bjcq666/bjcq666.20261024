@@ -1,24 +1,16 @@
-// 疾风行者 · 开始菜单（Start）
-
+// Panel opacity controlled centrally; no abrupt show/hide message races.
 onStart => {
-	setXYpos 0, 0
+    hide
+    for {
+        wait 0.02
+        left, top, width, height := Camera.viewportRect()
+        setXYpos left + width / 2, -top - height / 2
+        setSize 1.3 / cameraZoom
+        if activeMenu == "menu" {
+            setGraphicEffect GhostEffect, 100 - menuOpacity
+            show
+        } else { hide }
+    }
 }
 
-onMsg "uiMenu", => {
-	setLayer Front
-	show
-}
-
-onMsg "uiPlay", => {
-	hide
-}
-
-onMsg "uiGameOver", => {
-	hide
-}
-
-onClick => {
-	if state == "menu" {
-		broadcast "start"
-	}
-}
+onClick => { if state == "menu" && !uiBusy { broadcast "start" } }

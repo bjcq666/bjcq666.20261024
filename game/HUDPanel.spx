@@ -1,0 +1,2 @@
+// Fixed native monitor owns HUD; old world sprite disabled.
+onStart => { hide }

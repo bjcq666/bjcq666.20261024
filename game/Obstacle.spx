@@ -1,26 +1,2 @@
-// 疾风行者 · 障碍（Obstacle） 960×720
-// 仅在 playing 状态生成与移动；暂停时冻结
-
-onStart => {
-	hide
-	for {
-		wait 1.6
-		if state == "playing" {
-			clone
-		}
-	}
-}
-
-onCloned => {
-	setXYpos 520, -200
-	show
-	for {
-		wait 0.02
-		if state == "playing" {
-			changeXpos -18 * gameSpeed * slowMul
-			if xpos <= -470 {
-				destroy
-			}
-		}
-	}
-}
+// 旧无限跑酷障碍已停用。类文件保留供历史迁移，不再生成三角形。
+onStart => { hide }

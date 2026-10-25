@@ -1,0 +1,10 @@
+// 与美术分离的固定AABB调试框；在main.spx切换debugLevel。
+onStart => {
+    for {
+        wait 0.02
+        if debugLevel && state == "playing" {
+            setXYpos Player.xpos, Player.ypos
+            show
+        } else { hide }
+    }
+}

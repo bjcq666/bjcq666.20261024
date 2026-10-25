@@ -1,20 +1,20 @@
 {
   "backdrops": [
     {
-      "x": 480,
-      "y": 360,
+      "x": 6800,
+      "y": 700,
       "bitmapResolution": 1,
-      "name": "neon",
-      "path": "backdrop.svg",
-      "imageWidth": 960,
-      "imageHeight": 720
+      "name": "level",
+      "path": "level-background.svg",
+      "imageWidth": 13600,
+      "imageHeight": 1400
     }
   ],
   "backdropIndex": 0,
   "map": {
-    "width": 800,
-    "height": 600,
-    "mode": "fillRatio"
+    "width": 13600,
+    "height": 1400,
+    "mode": "actualSize"
   },
   "physics": false,
   "layerSortMode": "",
@@ -22,8 +22,8 @@
   "audioAttenuation": 0,
   "audioMaxDistance": 768,
   "run": {
-    "width": 800,
-    "height": 600
+    "width": 1100,
+    "height": 825
   },
   "camera": {
     "on": ""
@@ -31,50 +31,26 @@
   "stretchMode": true,
   "windowScale": 1,
   "zorder": [
-    {
-      "type": "monitor",
-      "name": "score",
-      "size": 1,
-      "target": "",
-      "val": "getVar:score",
-      "color": 15629590,
-      "label": "分数",
-      "mode": 1,
-      "x": -390,
-      "y": 280,
-      "visible": true
-    },
-    {
-      "type": "monitor",
-      "name": "time",
-      "size": 1,
-      "target": "",
-      "val": "getVar:elapsed",
-      "color": 15629590,
-      "label": "时间",
-      "mode": 1,
-      "x": -55,
-      "y": 280,
-      "visible": true
-    },
-    {
-      "type": "monitor",
-      "name": "lives",
-      "size": 1,
-      "target": "",
-      "val": "getVar:lives",
-      "color": 15629590,
-      "label": "生命",
-      "mode": 1,
-      "x": 285,
-      "y": 280,
-      "visible": true
-    },
     "Ground",
+    "Player",
+    "DebugBox",
+    "ScreenDim",
     "Start",
     "Gameover",
     "Pause",
-    "Player"
+    {
+      "type": "monitor",
+      "name": "fixedHUD",
+      "size": 1,
+      "target": "",
+      "val": "getVar:hudText",
+      "label": "",
+      "mode": 2,
+      "style": "default",
+      "x": -500,
+      "y": 380,
+      "visible": true
+    }
   ],
   "maxFPS": 60,
   "fontPreferences": [

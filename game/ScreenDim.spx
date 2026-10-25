@@ -1,0 +1,13 @@
+// Black veil below menu; alpha driven by stage transition timeline.
+onStart => {
+    for {
+        wait 0.02
+        _, top, _, height := Camera.viewportRect()
+        setXYpos wipeX, -top - height / 2
+        setSize 1 / cameraZoom
+        if dimOpacity > 0.1 {
+            setGraphicEffect GhostEffect, 100 - dimOpacity
+            show
+        } else { hide }
+    }
+}

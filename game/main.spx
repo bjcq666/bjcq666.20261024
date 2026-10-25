@@ -1,96 +1,141 @@
-// 疾风行者 · 舞台（Game）
-// 状态机：menu / playing / paused / dead
-// UI 消息：uiMenu / uiPlay / uiPause / uiGameOver
+import "fmt"
 
+// 固定关卡数据：进度0..6000 对应世界x=-3000..3000。
+// 共用矩形数据生成可见地形并计算AABB碰撞，避免图片alpha影响落地。
 var (
-	score     int
-	best      int
-	lives     int
-	gameSpeed float64
-	slowMul   float64
-	state     string
-	elapsed   int
+    levelLength = 12000
+    levelStart = -6000.0
+    groundY = -208.0
+    blockLeft = []float64{-6600, -5400, -4750, -3950, -3080, -2350, -1450, -800, 120, 850, 1450, 2200, 2920, 3900, 4700, 5600}
+    blockRight = []float64{-5400, -4750, -3950, -3480, -2350, -1450, -800, -200, 850, 1450, 2200, 2920, 3500, 4700, 5250, 6600}
+    blockTop = []float64{-208, -118, -208, -78, -168, -208, -98, -208, -138, -208, -108, -208, -148, -208, -88, -208}
+    playerHalfWidth = 14.0
+    playerHeight = 114.0
+    pitBottom = -300.0
+    deathY = -420.0
+    distance int
+    simulationTicks int
+    debugLevel = false
+    cameraZoom = 0.72
+    health int
+    hudText string
+    uiBusy bool
+    dimOpacity float64
+    menuOpacity float64
+    wipeX float64
+    activeMenu string
+    score int
+    best int
+    lives int
+    state string
+    elapsed int
+    gameSpeed = 1.25
+    slowMul = 1.0
 )
 
+// Native UI binding: no world position, camera zoom or smoothing compensation.
+func refreshHUD() {
+    bar := ""
+    for i := 0; i < 20; i++ {
+        if i * 5 < health { bar = bar + "|" } else { bar = bar + "." }
+    }
+    hudText = fmt.Sprintf("HP %3d / 100  [%s]\nSCORE %4d   TIME %4ds   DIST %5d / 12000", health, bar, score, elapsed, distance)
+}
+
+func updateCamera() {
+    // 800px视口，人物位于中心左80px，即水平40%。
+    Camera.setXYpos Player.xpos + 80 / cameraZoom, 0
+}
+
+func beginLevel() {
+    score = 0
+    distance = 0
+    health = 100
+    lives = 100
+    elapsed = 0
+    simulationTicks = 0
+    state = "transition"
+    broadcastAndWait "resetPlayer"
+    updateCamera
+    closeMenu
+}
+
+// Two stages: scene darkens first, menu fades in second. Input is locked.
+func openMenu(target string) {
+    uiBusy = true
+    state = "transition"
+    menuOpacity = 0
+    wipeX = -1000
+    for i := 0; i < 30; i++ {
+        wipeX = wipeX + 70
+        dimOpacity = 72
+        wait 0.02
+    }
+    activeMenu = target
+    broadcast "syncMenu"
+    for i := 1; i <= 20; i++ {
+        menuOpacity = float64(i) * 5
+        wait 0.02
+    }
+    state = target
+    uiBusy = false
+}
+
+func closeMenu() {
+    uiBusy = true
+    state = "transition"
+    for i := 0; i < 16; i++ {
+        menuOpacity = menuOpacity - 6.25
+        if menuOpacity < 0 { menuOpacity = 0 }
+        wait 0.02
+    }
+    activeMenu = ""
+    broadcast "syncMenu"
+    for i := 0; i < 30; i++ {
+        wipeX = wipeX + 70
+        wait 0.02
+    }
+    dimOpacity = 0
+    wipeX = -1000
+    state = "playing"
+    uiBusy = false
+}
+
 onStart => {
-	score = 0
-	best = 0
-	lives = 3
-	gameSpeed = 1
-	slowMul = 1
-	elapsed = 0
-	state = "menu"
-	broadcast "uiMenu"
-	// 计时 + 难度递增
-	for {
-		wait 1
-		if state == "playing" {
-			elapsed = elapsed + 1
-			gameSpeed = gameSpeed + 0.08
-			if gameSpeed > 3.5 {
-				gameSpeed = 3.5
-			}
-		}
-	}
+    state = "menu"
+    health = 100
+    lives = 100
+    Camera.setZoom cameraZoom
+    Camera.setXYpos levelStart + 80 / cameraZoom, 0
+    refreshHUD
+    openMenu "menu"
+    for {
+        wait 0.02
+        refreshHUD
+        if state == "playing" {
+            simulationTicks++
+            elapsed = simulationTicks / 50
+        }
+    }
 }
-
-onMsg "start", => {
-	if state == "menu" {
-		score = 0
-		lives = 3
-		elapsed = 0
-		gameSpeed = 1
-		slowMul = 1
-		state = "playing"
-		broadcast "uiPlay"
-	}
-}
-
-onMsg "restart", => {
-	score = 0
-	lives = 3
-	elapsed = 0
-	gameSpeed = 1
-	slowMul = 1
-	state = "playing"
-	broadcast "uiPlay"
-}
-
+onMsg "start", => { if state == "menu" && !uiBusy { beginLevel } }
+onMsg "restart", => { if !uiBusy && (state == "dead" || state == "won") { beginLevel } }
 onMsg "pause", => {
-	if state == "playing" {
-		state = "paused"
-		broadcast "uiPause"
-	} else if state == "paused" {
-		state = "playing"
-		broadcast "uiPlay"
-	}
+    if !uiBusy {
+        if state == "playing" { openMenu "paused" } else if state == "paused" { closeMenu }
+    }
 }
-
 onMsg "toMenu", => {
-	state = "menu"
-	broadcast "uiMenu"
+    if !uiBusy {
+        state = "transition"
+        openMenu "menu"
+    }
 }
-
-onMsg "coin", => {
-	if state == "playing" {
-		score++
-		if score > best {
-			best = score
-		}
-	}
-}
-
-onMsg "hit", => {
-	if state == "playing" {
-		lives = lives - 1
-		if lives <= 0 {
-			lives = 0
-			state = "dead"
-			broadcast "uiGameOver"
-		} else {
-			slowMul = 0.35
-			wait 1
-			slowMul = 1
-		}
-	}
+onMsg "finish", => {
+    if state == "playing" {
+        distance = levelLength
+        score = distance
+        if score > best { best = score }
+        openMenu "won"
+    }
 }

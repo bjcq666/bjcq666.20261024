@@ -1,8 +1,8 @@
 {
   "heading": 90,
   "x": 0,
-  "y": -254.16666666666666,
-  "size": 0.8333333333333334,
+  "y": 0,
+  "size": 1,
   "rotationStyle": "normal",
   "physicsMode": "no",
   "costumeIndex": 0,
@@ -16,14 +16,14 @@
   "collisionShapeParams": [],
   "costumes": [
     {
-      "x": 480,
-      "y": 55,
+      "x": 6200,
+      "y": 300,
       "faceRight": 0,
       "bitmapResolution": 1,
       "name": "default",
       "path": "Ground.svg",
-      "imageWidth": 960,
-      "imageHeight": 110
+      "imageWidth": 12400,
+      "imageHeight": 1000
     }
   ]
 }
