@@ -34,10 +34,6 @@
     "Ground",
     "Player",
     "DebugBox",
-    "ScreenDim",
-    "Start",
-    "Gameover",
-    "Pause",
     {
       "type": "monitor",
       "name": "fixedHUD",
@@ -50,7 +46,11 @@
       "x": -500,
       "y": 380,
       "visible": true
-    }
+    },
+    "ScreenDim",
+    "Start",
+    "Gameover",
+    "Pause"
   ],
   "maxFPS": 60,
   "fontPreferences": [

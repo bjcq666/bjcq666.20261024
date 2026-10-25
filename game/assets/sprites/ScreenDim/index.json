@@ -11,11 +11,11 @@
     {
       "name": "dim",
       "path": "dim.svg",
-      "x": 900,
-      "y": 700,
+      "x": 1300,
+      "y": 900,
       "bitmapResolution": 1,
-      "imageWidth": 1800,
-      "imageHeight": 1400
+      "imageWidth": 2600,
+      "imageHeight": 1800
     }
   ]
 }

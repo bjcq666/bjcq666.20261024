@@ -1,6 +1,6 @@
 import "fmt"
 
-// 固定关卡数据：进度0..6000 对应世界x=-3000..3000。
+// 固定关卡数据：进度0..12000 对应世界x=-6000..6000。
 // 共用矩形数据生成可见地形并计算AABB碰撞，避免图片alpha影响落地。
 var (
     levelLength = 12000
@@ -27,6 +27,9 @@ var (
     dimOpacity float64
     menuOpacity float64
     wipeX float64
+    veilScale = 1.0
+    maskUp bool
+    hudShown = true  // the monitor starts visible (assets/index.json)
     activeMenu string
     score int
     best int
@@ -47,61 +50,167 @@ func refreshHUD() {
 }
 
 func updateCamera() {
-    // 800px视口，人物位于中心左80px，即水平40%。
+    // 人物位于视口水平40%。
     Camera.setXYpos Player.xpos + 80 / cameraZoom, 0
 }
 
-func beginLevel() {
+// ---------------------------------------------------------------------------
+// Transition helpers
+//
+// Every UI element here is a world sprite and the camera glides towards its
+// target with built-in smoothing. Two measured facts drive the whole design:
+//   * viewportRect() reports the real (smoothed) visible rect, Camera.xpos() the
+//     target the camera is still flying to; their gap is the remaining flight.
+//   * a sprite placed from viewportRect() is exactly one frame behind the camera,
+//     so during a fast flight it visibly bounces.
+// Hence: nothing may be on screen while the camera flies fast, and the veil
+// must be oversized for that phase.
+// ---------------------------------------------------------------------------
+
+// Oversized veil for the camera-flight phase: it is placed from last frame's
+// position, so it needs slack or the stage peeks past its edge for a few frames.
+func veilThick() {
+    veilScale = 3.0
+}
+
+func veilThin() {
+    veilScale = 1.0
+}
+
+// Hold until the camera has finished its glide, so that whatever is revealed
+// afterwards shows a still world. The gap decays ~16% per tick, so this settles
+// in well under a second; the cap only guards a pathological case.
+func waitCameraStill() {
+    settled := false
+    for i := 0; i < 120 && !settled; i++ {
+        left, _, width, _ := Camera.viewportRect()
+        gap := left + width / 2 - Camera.xpos
+        if gap < 12 && gap > -12 {
+            settled = true
+        } else {
+            wait 0.02
+        }
+    }
+}
+
+// Rebuild the arena. Only ever called while the veil fully covers the stage.
+func resetStage() {
     score = 0
     distance = 0
     health = 100
     lives = 100
     elapsed = 0
     simulationTicks = 0
-    state = "transition"
     broadcastAndWait "resetPlayer"
     updateCamera
-    closeMenu
+    refreshHUD
 }
 
-// Two stages: scene darkens first, menu fades in second. Input is locked.
-func openMenu(target string) {
-    uiBusy = true
-    state = "transition"
-    menuOpacity = 0
-    wipeX = -1000
-    for i := 0; i < 30; i++ {
-        wipeX = wipeX + 70
-        dimOpacity = 72
+// The HUD is a native overlay that draws above the stage sprites, so the veil
+// cannot cover it: it has to be hidden explicitly during any menu.
+func syncHUD() {
+    want := state == "playing"
+    if want == hudShown { return }
+    hudShown = want
+    hud := getWidget(Monitor, "fixedHUD")
+    if want { hud.show } else { hud.hide }
+}
+
+// Slide the veil in from the left edge and park it dead centre. It is never
+// dismissed by the transition that opened it: it stays parked (fully opaque)
+// for the whole lifetime of the menu. Idempotent, so switching from one menu to
+// another never re-opens the stage for a frame.
+func maskIn() {
+    if maskUp { return }
+    maskUp = true
+    veilThin
+    wipeX = -2600
+    dimOpacity = 100
+    for i := 0; i < 13; i++ {
+        wipeX = wipeX + 200
         wait 0.02
     }
-    activeMenu = target
-    broadcast "syncMenu"
+    wipeX = 0
+}
+
+// Runs only after the menu is already gone: the parked veil withdraws to the
+// right edge and reveals whatever has been prepared behind it. Near the end of
+// the level the world fence stops the sheet from travelling far enough, so the
+// tail of the slide is paired with a short fade and the reveal always ends
+// clean instead of popping.
+func maskOut() {
+    maskUp = false
+    veilThin
+    wipeX = 0
+    for i := 0; i < 13; i++ {
+        wipeX = wipeX + 200
+        if i >= 8 && i <= 11 {
+            dimOpacity = 100 - float64(i-7)*25
+        }
+        wait 0.02
+    }
+    wipeX = 2600
+    dimOpacity = 0
+}
+
+func fadeMenuIn() {
     for i := 1; i <= 20; i++ {
         menuOpacity = float64(i) * 5
         wait 0.02
     }
+    menuOpacity = 100
+}
+
+// Fades the current panel out while it is still mounted on top of the parked
+// veil. The veil itself is untouched here.
+func fadeMenuOut() {
+    for i := 19; i >= 0; i-- {
+        menuOpacity = float64(i) * 5
+        wait 0.02
+    }
+    menuOpacity = 0
+}
+
+// veil in -> panel fades in on top of the parked veil -> veil stays parked.
+// Nothing behind the veil is touched here, and the camera never moves during
+// this transition, so neither the veil nor the panel can bounce.
+func openMenu(target string) {
+    uiBusy = true
+    state = "transition"
+    syncHUD
+    activeMenu = ""
+    menuOpacity = 0
+    broadcast "syncMenu"
+    maskIn
+    activeMenu = target
+    broadcast "syncMenu"
+    fadeMenuIn
     state = target
     uiBusy = false
 }
 
-func closeMenu() {
+// Panel fades out first, then the reveal. When the arena has to be rebuilt the
+// camera also has to fly back to the level start: the veil is oversized for
+// that flight, the rebuild happens while the screen is solid black behind it,
+// and the slide-out only starts once the camera has landed. The reset is never
+// visible and nothing on screen shivers while it happens.
+func resumePlay(rebuild bool) {
     uiBusy = true
     state = "transition"
-    for i := 0; i < 16; i++ {
-        menuOpacity = menuOpacity - 6.25
-        if menuOpacity < 0 { menuOpacity = 0 }
-        wait 0.02
-    }
+    fadeMenuOut
     activeMenu = ""
     broadcast "syncMenu"
-    for i := 0; i < 30; i++ {
-        wipeX = wipeX + 70
-        wait 0.02
+    if rebuild {
+        veilThick
+        wait 0.06
+        resetStage
+        waitCameraStill
     }
-    dimOpacity = 0
-    wipeX = -1000
+    veilThin
+    wait 0.06
+    maskOut
     state = "playing"
+    syncHUD
     uiBusy = false
 }
 
@@ -115,25 +224,23 @@ onStart => {
     openMenu "menu"
     for {
         wait 0.02
-        refreshHUD
+        syncHUD
         if state == "playing" {
+            refreshHUD
             simulationTicks++
             elapsed = simulationTicks / 50
         }
     }
 }
-onMsg "start", => { if state == "menu" && !uiBusy { beginLevel } }
-onMsg "restart", => { if !uiBusy && (state == "dead" || state == "won") { beginLevel } }
+onMsg "start", => { if state == "menu" && !uiBusy { resumePlay true } }
+onMsg "restart", => { if !uiBusy && (state == "dead" || state == "won") { resumePlay true } }
 onMsg "pause", => {
     if !uiBusy {
-        if state == "playing" { openMenu "paused" } else if state == "paused" { closeMenu }
+        if state == "playing" { openMenu "paused" } else if state == "paused" { resumePlay false }
     }
 }
 onMsg "toMenu", => {
-    if !uiBusy {
-        state = "transition"
-        openMenu "menu"
-    }
+    if !uiBusy { openMenu "menu" }
 }
 onMsg "finish", => {
     if state == "playing" {
