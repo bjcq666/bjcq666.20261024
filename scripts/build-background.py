@@ -41,7 +41,7 @@ SKY_HORIZON = "#4c7799"
 MIST = "#a8cbe4"
 FAR = "#2c4d6d"
 MID = "#17293f"
-NEAR = "#080f1a"
+NEAR = "#0b141f"
 NEAR_EDGE = "#5a90bd"
 STREET = "#0b1522"
 VOID = "#070c15"
@@ -82,7 +82,7 @@ def skyline(rnd, base, lo, hi, wlo, whi, gap, fill, opacity, antenna_chance=0.0,
 def near_anchor(rnd, x, w, h):
     """One near building: darkest value, crisp rim light, neon accents."""
     top = NEAR_BASE - h
-    o = [rect(x, top, w, h, NEAR, 1.0)]
+    o = [rect(x, top, w, H - top, NEAR, 1.0)]
     # stepped crown
     cw = int(w * rnd.uniform(0.42, 0.68))
     cx = x + (w - cw) // 2
@@ -92,7 +92,7 @@ def near_anchor(rnd, x, w, h):
     # rim light: top edge + one side
     o.append(rect(x, top, w, 3, NEAR_EDGE, 0.8))
     side_left = rnd.random() < 0.5
-    o.append(rect(x if side_left else x + w - 3, top, 3, h, NEAR_EDGE, 0.55))
+    o.append(rect(x if side_left else x + w - 3, top, 3, H - top, NEAR_EDGE, 0.55))
     # antenna with a warning light
     if rnd.random() < 0.5:
         ax = x + w * rnd.uniform(0.3, 0.7)
@@ -103,7 +103,7 @@ def near_anchor(rnd, x, w, h):
     if rnd.random() < 0.75:
         nx = x + 12 if side_left else x + w - 15
         col = CYAN if rnd.random() < 0.7 else MAGENTA
-        o.append(rect(nx, top + 34, 3, h - 80, col, 0.45))
+        o.append(rect(nx, top + 34, 3, min(H - top - 60, 520), col, 0.45))
     # signage
     if rnd.random() < 0.6:
         bw = rnd.randint(50, 130)
@@ -113,7 +113,7 @@ def near_anchor(rnd, x, w, h):
         col = CYAN if rnd.random() < 0.55 else MAGENTA
         o.append(rect(bx, by, bw, bh, col, 0.32))
     # faint horizontal floor lines, very low contrast
-    for r in range(h // 52):
+    for r in range(min(14, (H - top) // 52)):
         if rnd.random() < 0.5:
             o.append(rect(x + 18, top + 34 + r * 52, w - 36, 2, NEAR_EDGE, 0.12))
     return o
@@ -180,10 +180,10 @@ def build():
     # near anchors
     x = -80
     while x < W + 80:
-        w = rnd.randint(320, 620)
+        w = rnd.randint(220, 430)
         h = rnd.randint(300, 640)
         b += near_anchor(rnd, x, w, h)
-        x += w + rnd.randint(420, 1100)
+        x += w + rnd.randint(620, 1500)
 
     # street light spill, then fade to the void below the play surface
     b.append(rect(0, NEAR_BASE - 8, W, 4, CYAN, 0.10))
