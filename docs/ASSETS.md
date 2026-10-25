@@ -44,6 +44,15 @@
 原有几何图形角色、背景、菜单为项目原型制作。旧角色SVG目前不再注册。
 中文字体来自用户从XBuilder导出的测试工程；字体具体许可证尚需补核，不应宣称整个素材目录均为MIT。
 
-## HUD
+## 本仓库自产的程序化素材
 
-血量暗角 11 张造型由 `scripts/build-hud.py` 生成（0%..100%，10% 一档）。
+| 产物 | 生成脚本 | 说明 |
+|---|---|---|
+| `assets/sprites/Ground/Ground.svg` | `scripts/build-ground.py` | 14700×1000，楼顶地形 + 房顶小屋 + 终点信标，矩形表直接解析自 `main.spx` |
+| `assets/level-background.svg` | `scripts/build-background.py` | 15000×1400，黄昏城市远景 |
+| `assets/sprites/Hud/hp0..100.svg` | `scripts/build-hud.py` | 血量暗角 11 档（0%..100%，10% 一档） |
+| `assets/sprites/ScreenDim/dim.svg` | `scripts/build-ui-assets.py` | 2600×1800 渐变转场遮罩（左→右，与游戏同色系） |
+| `assets/sprites/Menu/{start,pause,gameover}.svg` | `scripts/build-ui-assets.py` | 三块菜单面板，文字已转矢量路径，不依赖字体 |
+| `assets/sounds/*` | `scripts/build-audio.py` | 8 个音效 + 1 段 BGM，纯 Python 标准库合成 |
+
+**这些都是生成物，不要手改**；改参数重跑对应脚本即可，仓库里的文件就是生成结果。

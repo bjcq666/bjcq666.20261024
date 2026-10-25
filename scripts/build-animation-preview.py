@@ -57,7 +57,7 @@ def extract():
 
 TEMPLATE = '''<!doctype html>
 <html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Neon Dash · 火柴人动画试片</title>
+<title>Neon Parkour · 火柴人动画试片</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#101827;color:#e6edf7;font:15px system-ui,sans-serif}main{max-width:1200px;margin:auto;padding:28px}h1{margin:0 0 10px}.muted{color:#a7b6ca;line-height:1.7}nav{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:22px 0}button,select{padding:9px 14px;border:1px solid #516981;border-radius:8px;background:#24374b;color:white}section{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}article{background:#1c2a3b;padding:16px;border-radius:14px}h2{font-size:19px;margin:0 0 8px}.stage{position:relative;height:280px;background:#e8edf1;border-radius:8px;overflow:hidden}.stage:after{content:"";position:absolute;left:0;right:0;top:264px;border-top:1px dashed #678}.stage img{position:absolute;width:480px;height:270px;max-width:none;left:50%;top:4px;transform:translateX(-50%);object-fit:contain}body.dark .stage{background:#182438}body.cyan img{filter:brightness(0) saturate(100%) invert(82%) sepia(83%) saturate(2885%) hue-rotate(135deg) brightness(103%) contrast(104%)}.info{min-height:48px;margin-top:12px;color:#c2d2e5;font:13px monospace}.foot{margin-top:25px}
 </style><main>

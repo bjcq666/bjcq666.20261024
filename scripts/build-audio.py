@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate every sound effect and the music loop for Neon Dash.
+"""Generate every sound effect and the music loop for Neon Parkour.
 
 All audio is synthesized here from scratch (sine/square/saw/noise + envelopes),
 so the repository ships no third-party audio and needs no licence review for it.

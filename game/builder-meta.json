@@ -1,1 +1,6 @@
-{"type":"game","displayName":"疾风行者","description":"","instructions":""}
+{
+  "type": "game",
+  "displayName": "霓虹跑酷",
+  "description": "赛博霓虹风楼顶跑酷：跳过楼间空隙、吃掉白色积分球、躲开炮塔与追逐的无人机。",
+  "instructions": ""
+}

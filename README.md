@@ -1,4 +1,4 @@
-# 疾风行者 · Neon Dash
+# 霓虹跑酷 · Neon Parkour
 
 > 用 **XBuilder（spx 引擎）** 做的赛博霓虹风 2D 楼顶跑酷：在霓虹都市的摩天楼顶之间跳跃，身后一颗球形无人机紧追不舍。
 
@@ -75,7 +75,7 @@ cd game && spx run -headless -v      # 只看有没有编译错误，注意跑�
 
 - **引擎** [spx](https://github.com/goplus/spx)（Scratch 兼容 2D 引擎）
 - **语言** XGo classfile（`.spx`，编译期严格：单 `var` 块、函数须写在事件处理器之前、没有 `break`）
-- **素材** 全部程序化生成：地形与背景是脚本生成的 SVG，音效与 BGM 是 Python 现场合成，**无第三方音频/位图**
+- **素材** 除火柴人外全部程序化生成：地形、背景、血量暗角、转场遮罩、菜单面板都是脚本生成的 SVG，音效与 BGM 是 Python 现场合成
 - **角色素材** TheRealGi 火柴人（作者宽泛许可，见 `docs/ASSETS.md`）
 
 ## 🧑‍💻 开发流程

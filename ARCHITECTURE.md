@@ -1,4 +1,4 @@
-# 架构设计 · 疾风行者
+# 架构设计 · 霓虹跑酷
 
 > 模块规格、数据流、关键不变量、素材管线
 
@@ -34,7 +34,7 @@ spx 是 Scratch 兼容引擎，代码是 XGo classfile：
 | **AudioCue** | `AudioCue.spx` | 唯一音效发射源，贴着相机视口中心 | `play` / `pausePlaying` / `resumePlaying` |
 | **ScreenDim** | `ScreenDim.spx` | 转场黑罩，钉在屏幕上，`veilScale` 决定厚度 | `wipeX`、`dimOpacity`、`veilScale` |
 | **Start / Pause / Gameover** | 三个 `.spx` | 菜单面板，屏幕居中 + `GhostEffect` 淡入淡出 | `activeMenu`、`menuOpacity` |
-| **Orb（道具）** | `Orb.spx` | 3 个造型共用一个类：积分球（`orb`）/ 炮塔（`base`）/ 炮弹（`bullet`），靠 `costumeName` 分流 | `main.spx` 的 `orbRoof/orbSize/turretRoof`、`Player`、`Fx` |
+| **Orb（道具） | `Orb.spx` | 3 个造型共用一个类：积分球（`orb`）/ 炮塔（`base`）/ 炮弹（`bullet`），靠 `costumeName` 分流 | `main.spx` 的 `orbRoof/orbSize/turretRoof`、`Player`、`Fx` |
 | **Ground** | `Ground.spx` | 只负责绘图，不含逻辑 | `Ground.svg` |
 | **Hud** | `Hud.spx` | 血量暗角（11 张连屏渐变造型），位置由 `placeHud` 在相机同一 tick 设置 | `health`、`Camera.viewportRect` |
 | **Menu** | `Menu.spx` | 开始 / 暂停 / 结算三块面板合成一个精灵，靠造型区分；结算用 `say` 播报得分与死亡数 | `activeMenu`、`menuOpacity` |
@@ -112,11 +112,16 @@ resumePlay(rebuild):
 
 | 脚本 | 作用 |
 |---|---|
-| `scripts/build-ground.py` | 解析 `main.spx` 矩形表 → 生成 `Ground.svg`（楼顶 + 立面 + 悬挂楼板 + 终点信标） |
+| `scripts/build-ground.py` | 解析 `main.spx` 矩形表 → 生成 `Ground.svg`（楼顶 + 立面 + 房顶小屋 + 终点信标） |
 | `scripts/build-background.py` | 生成 `level-background.svg`（黄昏天空 + 三层城市 + 雾带 + 霓虹） |
-| `scripts/build-audio.py` | 合成 7 个音效 + 8 秒循环 BGM（纯标准库） |
-| `scripts/build-ui-assets.py` | 生成 HUD 面板与三个菜单面板（文字转矢量路径，避免缺字） |
+| `scripts/build-audio.py` | 合成 8 个音效 + 8 秒循环 BGM（纯标准库） |
+| `scripts/build-hud.py` | 生成血量暗角 11 档造型（`assets/sprites/Hud/`） |
+| `scripts/build-ui-assets.py` | 生成渐变转场遮罩 + Menu 的三块面板（文字转矢量路径，避免缺字） |
 | `scripts/test-level.py` | 关卡几何断言 + 自动跳跃机器人跑完全程 + 相机取景 |
+
+生成器与产物的对应关系是硬约定：**不要手改生成物**，改参数重跑脚本。曾经的教训是
+`build-ui-assets.py` 还按旧架构生成 `Start/Pause/Gameover` 与 101 张血条造型，重跑一次
+就把渐变遮罩覆盖成纯黑、还复活了三个死目录 —— 现在脚本只产出当前架构在用的东西。
 
 ## 8. AI 协作方式（可复盘）
 

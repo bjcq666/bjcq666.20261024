@@ -30,16 +30,40 @@ def save(name,costumes,w,h,pivot):
   c['costumes'].append(dict(name=title,path=title+'.svg',x=pivot[0],y=pivot[1],bitmapResolution=1,imageWidth=w,imageHeight=h))
  (p/'index.json').write_text(json.dumps(c,indent=2)+'\n')
 def svg(w,h,body):return f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">{body}</svg>'
-# Text kept ASCII for deterministic SVG rasterization; numbers remain engine Monitors.
-costumes=[]
-for hp in range(101):
- b='<rect width="320" height="96" rx="10" fill="#101827" fill-opacity=".9"/>'
- b+=f'<rect x="16" y="28" width="280" height="8" rx="4" fill="#344357"/><rect x="16" y="28" width="{2.8*hp}" height="8" rx="4" fill="#ff0263"/>'
- b+=f'<g font-family="sans-serif" font-size="11" fill="#d8e4f1"><text x="16" y="19">HP {hp} / 100</text><text x="16" y="57">SCORE</text><text x="110" y="57">TIME / s</text><text x="200" y="57">DIST / 6000</text></g>'
- costumes.append((str(hp),svg(320,96,b)))
-save('HUDPanel',costumes,320,96,(0,0))
-save('ScreenDim',[('dim',svg(1200,900,'<rect width="1200" height="900" fill="#000"/>'))],1200,900,(600,450))
-for name,title,sub,hint in [('Start','NEON DASH','SPACE / CLICK TO START','ARROWS TO MOVE  |  SPACE / UP DOUBLE JUMP'),('Pause','PAUSED','ESC TO CONTINUE','Q TO MAIN MENU'),('Gameover','RESULTS','R TO RESTART','M TO MAIN MENU')]:
+# 说明：血量 HUD 现在是 Hud.spx 的暗角（scripts/build-hud.py 生成），
+# 这里只负责「转场遮罩」和「三块菜单面板」。
+
+VEIL_W, VEIL_H = 2600, 1800
+veil = f'''<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#0c1a2e"/>
+<stop offset="0.42" stop-color="#091524"/>
+<stop offset="0.78" stop-color="#060d18"/>
+<stop offset="1" stop-color="#03070e"/>
+</linearGradient>
+<radialGradient id="halo" cx="16%" cy="50%" r="46%">
+<stop offset="0" stop-color="#3fe0f0" stop-opacity="0.12"/>
+<stop offset="1" stop-color="#3fe0f0" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="glow" cx="84%" cy="54%" r="50%">
+<stop offset="0" stop-color="#ff0263" stop-opacity="0.16"/>
+<stop offset="0.55" stop-color="#ff0263" stop-opacity="0.06"/>
+<stop offset="1" stop-color="#ff0263" stop-opacity="0"/>
+</radialGradient>
+</defs>
+<polygon points="-600,0 3200,0 2900,1800 -900,1800" fill="url(#sky)"/>
+<polygon points="-600,0 3200,0 2900,1800 -900,1800" fill="url(#halo)"/>
+<polygon points="-600,0 3200,0 2900,1800 -900,1800" fill="url(#glow)"/>
+<g opacity="0.35">
+<rect x="-600" y="1712" width="3800" height="2" fill="#3fe0f0" fill-opacity="0.18"/>
+<rect x="-600" y="88" width="3800" height="2" fill="#ff0263" fill-opacity="0.14"/>
+</g>'''
+save('ScreenDim',[('dim',svg(VEIL_W,VEIL_H,veil))],VEIL_W,VEIL_H,(VEIL_W/2,VEIL_H/2))
+
+# 三块面板合成一个 Menu 精灵（造型区分），和 Menu.spx 一致
+panel_costumes=[]
+for name,title,sub,hint in [('start','NEON PARKOUR','SPACE / CLICK TO START','ARROWS TO MOVE  |  SPACE / UP DOUBLE JUMP'),('pause','PAUSED','ESC TO CONTINUE','Q TO MAIN MENU'),('gameover','RESULTS','R TO RESTART','M TO MAIN MENU')]:
  b=f'<rect x="20" y="20" width="440" height="260" rx="18" fill="#142236" fill-opacity=".96" stroke="#3e566f"/><g text-anchor="middle" font-family="sans-serif" fill="#e9f0f9"><text x="240" y="100" font-size="34" font-weight="bold">{title}</text><text x="240" y="166" font-size="18" fill="#ff0263">{sub}</text><text x="240" y="220" font-size="12" fill="#aabdd2">{hint}</text></g>'
- save(name,[('panel',svg(480,300,b))],480,300,(240,150))
-print('Generated 101 health values, screen dimmer and transparent menu panels.')
+ panel_costumes.append((name,svg(480,300,b)))
+save('Menu',panel_costumes,480,300,(240,150))
+print('Generated the gradient veil and the three Menu panels.')
