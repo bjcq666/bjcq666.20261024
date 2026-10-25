@@ -26,16 +26,16 @@ var (
     debugLevel = false
     cameraZoom = 0.72
     health int
-    hudText string
+    hpText string
     uiBusy bool
-    dimOpacity float64
+    dimOpacity = 100.0
     menuOpacity float64
-    wipeX float64
-    maskUp bool
-    hudShown = true  // the monitor starts visible (assets/index.json)
+    wipeX = 0.0
+    maskUp = true
     activeMenu string
     score int
     best int
+    deaths int
     lives int
     state string
     elapsed int
@@ -43,17 +43,35 @@ var (
 
 // Native UI binding: no world position, camera zoom or smoothing compensation.
 func refreshHUD() {
-    bar := ""
-    for i := 0; i < 20; i++ {
-        if i * 5 < health { bar = bar + "|" } else { bar = bar + "." }
+    // 左上角的血量数字走原生监视器（方案 B）：它是引擎 UI，像素级稳定
+    if score < 0 {
+        score = 0
     }
-    hudText = fmt.Sprintf("HP %3d / 100  [%s]\nSCORE %4d   TIME %4ds   DIST %5d / 13500", health, bar, score, elapsed, distance)
+    if health < 0 { health = 0 }
+    hpText = fmt.Sprintf("%d", health)
 }
 
 // 镜头目标位置 + 受击/坠亡抖动。抖动只改相机目标点，几帧内自然衰减回 0。
 func updateCamera() {
     // 人物位于视口水平40%。
     Camera.setXYpos Player.xpos + 80 / cameraZoom, 0
+}
+
+// HUD 血条：和相机在**同一个 tick、同一个公式**下摆位。
+// 它原来有自己的 20Hz 循环，和每帧更新的相机存在变化的相位差，
+// 屏幕上看就是血条在以一两个像素为幅度抖动。放进相机更新的同一个 tick 后，
+// 相位差恒定，抖动消失。
+// 原生监视器画在所有精灵之上，黑罩盖不住它，所以要在进出菜单时显式开关
+func syncHudView() {
+    showView := state == "playing"
+    if w := getWidget(Monitor, "hpView"); w != nil {
+        if showView { w.show } else { w.hide }
+    }
+}
+
+func placeHud() {
+    left, top, width, height := Camera.viewportRect()
+    Hud.setXYpos left + width / 2, -top - height / 2
 }
 
 // ---------------------------------------------------------------------------
@@ -182,16 +200,6 @@ func resetStage() {
     refreshHUD
 }
 
-// The HUD is a native overlay that draws above the stage sprites, so the veil
-// cannot cover it: it has to be hidden explicitly during any menu.
-func syncHUD() {
-    want := state == "playing"
-    if want == hudShown { return }
-    hudShown = want
-    hud := getWidget(Monitor, "fixedHUD")
-    if want { hud.show } else { hud.hide }
-}
-
 // Slide the veil in from the left edge and park it dead centre. It is never
 // dismissed by the transition that opened it: it stays parked (fully opaque)
 // for the whole lifetime of the menu. Idempotent, so switching from one menu to
@@ -250,8 +258,9 @@ func fadeMenuOut() {
 // this transition, so neither the veil nor the panel can bounce.
 func openMenu(target string) {
     uiBusy = true
+    // 菜单里也要有 BGM：从暂停回主菜单时之前 pausePlaying 过，这里必须恢复
+    AudioCue.musicResume
     state = "transition"
-    syncHUD
     activeMenu = ""
     menuOpacity = 0
     broadcast "syncMenu"
@@ -260,6 +269,7 @@ func openMenu(target string) {
     broadcast "syncMenu"
     fadeMenuIn
     state = target
+    syncHudView
     uiBusy = false
 }
 
@@ -270,6 +280,7 @@ func openMenu(target string) {
 // visible and nothing on screen shivers while it happens.
 func resumePlay(rebuild bool) {
     uiBusy = true
+    AudioCue.musicResume
     state = "transition"
     fadeMenuOut
     activeMenu = ""
@@ -280,7 +291,7 @@ func resumePlay(rebuild bool) {
     }
     maskOut
     state = "playing"
-    syncHUD
+    syncHudView
     uiBusy = false
 }
 
@@ -289,13 +300,18 @@ onStart => {
     health = 100
     lives = 100
     Camera.setZoom cameraZoom
-    Camera.setXYpos levelStart + 80 / cameraZoom, 0
     refreshHUD
     AudioCue.musicOn
+    // 先让出几帧：舞台的 onStart 会先跑完，才轮到黑罩精灵的 onStart。
+    // 不先等这几帧就搬相机的话，黑罩还没显示，观众会看到相机横穿整张地图。
+    wait 0.08
+    syncHudView
+    Camera.setXYpos levelStart + 80 / cameraZoom, 0
+    glideCameraHome
     openMenu "menu"
     for {
         wait 0.02
-        syncHUD
+        syncHudView
         if state == "playing" {
             refreshHUD
             simulationTicks++

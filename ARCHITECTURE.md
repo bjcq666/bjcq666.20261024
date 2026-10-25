@@ -36,7 +36,9 @@ spx 是 Scratch 兼容引擎，代码是 XGo classfile：
 | **Start / Pause / Gameover** | 三个 `.spx` | 菜单面板，屏幕居中 + `GhostEffect` 淡入淡出 | `activeMenu`、`menuOpacity` |
 | **Orb（道具）** | `Orb.spx` | 3 个造型共用一个类：积分球（`orb`）/ 炮塔（`base`）/ 炮弹（`bullet`），靠 `costumeName` 分流 | `main.spx` 的 `orbRoof/orbSize/turretRoof`、`Player`、`Fx` |
 | **Ground** | `Ground.spx` | 只负责绘图，不含逻辑 | `Ground.svg` |
-| **HUD** | `assets/index.json` 的 Monitor | 原生 UI 层，显示 `hudText` | `refreshHUD()` |
+| **Hud** | `Hud.spx` | 血量暗角（11 张连屏渐变造型），位置由 `placeHud` 在相机同一 tick 设置 | `health`、`Camera.viewportRect` |
+| **Menu** | `Menu.spx` | 开始 / 暂停 / 结算三块面板合成一个精灵，靠造型区分；结算用 `say` 播报得分与死亡数 | `activeMenu`、`menuOpacity` |
+| **血量数值** | `assets/index.json` 的 Monitor `hpView` | 原生 UI，显示 `hpText`，必须显式跟随 `state` 显隐 | `refreshHUD()`、`syncHudView()` |
 
 ## 4. 数据流与关键契约
 
@@ -87,9 +89,13 @@ resumePlay(rebuild):
    空隙 423~545px（12 条里 8 条必须二段跳），高差 ≤ 130px，小屋比楼顶高 140~180px。
 3. **黑罩必须在菜单之下、舞台之上**：由 `assets/index.json` 的 `zorder` 保证，禁止脚本里用
    `setLayer Front` 抢层（四个精灵互相抢会变成执行顺序决定层级）。
-4. **UI 用 `viewportRect()` 定位**：`Camera.xpos` 是目标位置，相机平滑飞行时会把 UI 甩出屏幕。
-5. **音效只从 `AudioCue` 发射**，且 `audioMaxDistance` 必须远大于地图宽度，否则会被 2D 距离裁切。
-6. **持久道具用 hide 而不是 destroy**：积分球、炮塔都是常驻克隆，用掉后 `hide`，
+4. **屏幕元素与相机同 tick 定位**：`Camera.xpos` 是目标位置（相机会滞后），`viewportRect()`
+   是上一帧的实际相机；**小而静止**的屏幕元素如果自己跑循环摆位，会因相位差抖动 1~2px。
+   要么放进相机更新的同一个 tick（`placeHud`），要么做成大面积图形（暗角、遮罩），
+   要么干脆用原生 UI（监视器）。
+5. **原生监视器盖在所有精灵之上**，黑罩盖不住它，必须显式 `show/hide`（`syncHudView`）。
+6. **音效只从 `AudioCue` 发射**，且 `audioMaxDistance` 必须远大于地图宽度，否则会被 2D 距离裁切。
+7. **持久道具用 hide 而不是 destroy**：积分球、炮塔都是常驻克隆，用掉后 `hide`，
    重开时广播复位。若"销毁 + 重建"，上一局残留 + 新建会顶到克隆上限 300，部分道具静默不生成。
 
 ## 6. 引擎硬限制（决定了很多实现细节）
@@ -97,7 +103,7 @@ resumePlay(rebuild):
 | 限制 | 数值 | 影响 |
 |---|---|---|
 | 单张纹理边长 | 16384px | 地图宽 + 两侧余量必须 < 16384，所以关卡长度上限约 15000 |
-| classfile 反射方法表 | 2560 | **实测 11 个精灵类型就会启动失败**（10 个可以）。所以炮塔/炮弹只能作为造型并进 `Orb`，不能新建类文件 |
+| classfile 反射方法表 | 2560 | **实测 11 个精灵类型就会启动失败**（10 个可以）。所以炮塔/炮弹只能作为造型并进 `Orb`，三块面板合并成 `Menu`。当前 9 个类型 |
 | 克隆总数 | 300 | 常驻克隆（积分球 136 颗）要算进预算，长跑时不能再无脑销毁重建 |
 | 一个 classfile | 只能一个顶层 `var` 块 | 变量必须集中声明 |
 | 相机 | 自带平滑（每帧追平剩余 16%） | 一切屏幕对齐要用 `viewportRect()` + 等相机落地 |

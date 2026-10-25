@@ -118,13 +118,14 @@ onStart => {
                 AudioCue.death
                 Fx.burst xpos, ypos, 18
                 shakeCamera 10
+                deaths = deaths + 1
                 health = 0
                 lives = 0
                 openMenu "dead"
             }
             distance = int(xpos - levelStart)
-            score = distance
             updateCamera
+            placeHud
             if distance >= levelLength { broadcast "finish" }
             if !onGround {
                 // 约 36 个模拟帧覆盖一次飞行，依次走完源帧 1..21。
@@ -185,6 +186,7 @@ onMsg "caught", => {
         AudioCue.death
         Fx.burst xpos, ypos + 60, 20
         shakeCamera 12
+        deaths = deaths + 1
         health = 0
         lives = 0
         openMenu "dead"

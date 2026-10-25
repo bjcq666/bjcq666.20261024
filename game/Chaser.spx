@@ -65,8 +65,11 @@ func fly() {
     left, _, _, _ := Camera.viewportRect()
     gap := Player.xpos - xpos
     if phase == "chase" {
-        if baseSpeed > 12.0 {
-            baseSpeed = baseSpeed - 0.008
+        // 巡航速度从 14 缓慢衰减到 10（比玩家慢 4）。
+        // 之前衰减到 12（只慢 2）时，无人机在屏幕上的相对位移接近 0，
+        // 固定步长与刷新率不同步造成的抖动会显得像"卡顿"。
+        if baseSpeed > 10.0 {
+            baseSpeed = baseSpeed - 0.012
         }
         vel = vel + (baseSpeed - vel) * 0.12
         if xpos < left - 70 {

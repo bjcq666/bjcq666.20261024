@@ -61,7 +61,8 @@ func runOrb() {
     setGraphicEffect GhostEffect, 0
     show
     for {
-        wait 0.02
+        // 积分球只需要 20Hz 的邻近判定：136 颗常驻克隆每帧跑脚本太费
+        wait 0.05
         if !taken {
             spin = spin + 6
             setHeading Direction(spin)
@@ -119,7 +120,8 @@ func runTurret() {
     setCostume "base"
     show
     for {
-        wait 0.02
+        // 炮塔 20Hz 足够（瞄准转向仍然跟手）
+        wait 0.05
         if state == "playing" && !dead {
             turnTo Player
             dx := xpos - Player.xpos

@@ -2,10 +2,10 @@
   "heading": 90,
   "x": 0,
   "y": 0,
-  "size": 1,
+  "size": 1.8,
   "rotationStyle": "normal",
   "physicsMode": "no",
-  "visible": false,
+  "visible": true,
   "costumeIndex": 0,
   "costumes": [
     {

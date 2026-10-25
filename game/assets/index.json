@@ -31,29 +31,28 @@
   "stretchMode": true,
   "windowScale": 1,
   "zorder": [
+    {
+      "type": "monitor",
+      "name": "hpView",
+      "size": 1,
+      "target": "",
+      "val": "getVar:hpText",
+      "label": "HP",
+      "mode": 1,
+      "style": "default",
+      "x": -500,
+      "y": 380,
+      "visible": false
+    },
     "Ground",
     "AudioCue",
     "Player",
     "Fx",
     "Orb",
     "Chaser",
-    {
-      "type": "monitor",
-      "name": "fixedHUD",
-      "size": 1,
-      "target": "",
-      "val": "getVar:hudText",
-      "label": "",
-      "mode": 2,
-      "style": "default",
-      "x": -500,
-      "y": 380,
-      "visible": true
-    },
+    "Hud",
     "ScreenDim",
-    "Start",
-    "Gameover",
-    "Pause"
+    "Menu"
   ],
   "maxFPS": 60,
   "fontPreferences": [

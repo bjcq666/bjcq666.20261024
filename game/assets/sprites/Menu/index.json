@@ -1,0 +1,39 @@
+{
+  "heading": 90,
+  "x": 0,
+  "y": 0,
+  "size": 1,
+  "rotationStyle": "normal",
+  "physicsMode": "no",
+  "visible": false,
+  "costumeIndex": 0,
+  "costumes": [
+    {
+      "name": "start",
+      "path": "start.svg",
+      "x": 240,
+      "y": 150,
+      "bitmapResolution": 1,
+      "imageWidth": 480,
+      "imageHeight": 300
+    },
+    {
+      "name": "pause",
+      "path": "pause.svg",
+      "x": 240,
+      "y": 150,
+      "bitmapResolution": 1,
+      "imageWidth": 480,
+      "imageHeight": 300
+    },
+    {
+      "name": "gameover",
+      "path": "gameover.svg",
+      "x": 240,
+      "y": 150,
+      "bitmapResolution": 1,
+      "imageWidth": 480,
+      "imageHeight": 300
+    }
+  ]
+}
