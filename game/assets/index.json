@@ -1,85 +1,84 @@
 {
-	"backdrops": [
-		{
-			"x": 480,
-			"y": 360,
-			"bitmapResolution": 1,
-			"name": "neon",
-			"path": "backdrop.svg",
-			"imageWidth": 960,
-			"imageHeight": 720
-		}
-	],
-	"backdropIndex": 0,
-	"map": {
-		"width": 960,
-		"height": 720,
-		"mode": "fillRatio"
-	},
-	"physics": false,
-	"layerSortMode": "",
-	"autoSetCollisionLayer": true,
-	"audioAttenuation": 0,
-	"audioMaxDistance": 768,
-	"run": {
-		"width": 960,
-		"height": 720
-	},
-	"camera": {
-		"on": ""
-	},
-	"stretchMode": true,
-	"windowScale": 1,
-	"zorder": [
-		{
-			"type": "monitor",
-			"name": "score",
-			"size": 1,
-			"target": "",
-			"val": "getVar:score",
-			"color": 15629590,
-			"label": "分数",
-			"mode": 1,
-			"x": -470,
-			"y": 340,
-			"visible": true
-		},
-		{
-			"type": "monitor",
-			"name": "time",
-			"size": 1,
-			"target": "",
-			"val": "getVar:elapsed",
-			"color": 15629590,
-			"label": "时间",
-			"mode": 1,
-			"x": -55,
-			"y": 340,
-			"visible": true
-		},
-		{
-			"type": "monitor",
-			"name": "lives",
-			"size": 1,
-			"target": "",
-			"val": "getVar:lives",
-			"color": 15629590,
-			"label": "生命",
-			"mode": 1,
-			"x": 365,
-			"y": 340,
-			"visible": true
-		},
-		"Obstacle",
-		"Coin",
-		"Start",
-		"Gameover",
-		"Pause",
-		"Player"
-	],
-	"maxFPS": 60,
-	"fontPreferences": [
-		"basic-chinese",
-		"default"
-	]
+  "backdrops": [
+    {
+      "x": 480,
+      "y": 360,
+      "bitmapResolution": 1,
+      "name": "neon",
+      "path": "backdrop.svg",
+      "imageWidth": 960,
+      "imageHeight": 720
+    }
+  ],
+  "backdropIndex": 0,
+  "map": {
+    "width": 800,
+    "height": 600,
+    "mode": "fillRatio"
+  },
+  "physics": false,
+  "layerSortMode": "",
+  "autoSetCollisionLayer": true,
+  "audioAttenuation": 0,
+  "audioMaxDistance": 768,
+  "run": {
+    "width": 800,
+    "height": 600
+  },
+  "camera": {
+    "on": ""
+  },
+  "stretchMode": true,
+  "windowScale": 1,
+  "zorder": [
+    {
+      "type": "monitor",
+      "name": "score",
+      "size": 1,
+      "target": "",
+      "val": "getVar:score",
+      "color": 15629590,
+      "label": "分数",
+      "mode": 1,
+      "x": -390,
+      "y": 280,
+      "visible": true
+    },
+    {
+      "type": "monitor",
+      "name": "time",
+      "size": 1,
+      "target": "",
+      "val": "getVar:elapsed",
+      "color": 15629590,
+      "label": "时间",
+      "mode": 1,
+      "x": -55,
+      "y": 280,
+      "visible": true
+    },
+    {
+      "type": "monitor",
+      "name": "lives",
+      "size": 1,
+      "target": "",
+      "val": "getVar:lives",
+      "color": 15629590,
+      "label": "生命",
+      "mode": 1,
+      "x": 285,
+      "y": 280,
+      "visible": true
+    },
+    "Ground",
+    "Start",
+    "Gameover",
+    "Pause",
+    "Player"
+  ],
+  "maxFPS": 60,
+  "fontPreferences": [
+    "basic-chinese",
+    "default"
+  ]
 }

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="160" viewBox="0 0 100 160">
+  <!-- Visual debug envelope only; terrain collision is not implemented by this SVG. -->
+  <rect x="8" y="3" width="84" height="150" fill="#0066ff" fill-opacity="0.06" stroke="#3f7bff" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <polyline points="38,90 26,114 40,130" fill="none" stroke="#42a6c6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 38,130 h 9" stroke="#42a6c6" stroke-width="5" stroke-linecap="round"/>
+  <polyline points="62,90 76,114 62,130" fill="none" stroke="#00e5ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 60,130 h 9" stroke="#00e5ff" stroke-width="5" stroke-linecap="round"/>
+  <rect x="36" y="34" width="28" height="56" rx="2" fill="#00e5ff"/>
+  <circle cx="50" cy="22" r="12" fill="none" stroke="#00e5ff" stroke-width="5"/>
+  <polyline points="36,44 24,25 30,8" fill="none" stroke="#42a6c6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="64,44 76,25 70,8" fill="none" stroke="#00e5ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

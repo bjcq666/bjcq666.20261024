@@ -1,96 +1,137 @@
-// 疾风行者 · 主角（Player） 960×720
-// 跳跃 / 滑铲 / 碰撞扣命 + 1 秒无敌闪烁 / 菜单与暂停控制
-
+// 火柴人：TheRealGi PNG 动画；姿态与位移解耦，下蹲已取消。
+// 50Hz 模拟。Jump 1..21 用于飞行，22..40 用于落地恢复，不回放旧帧。
 var (
-	onGround   bool
-	invincible bool
+    vx float64
+    vy float64
+    onGround bool
+    frame int
+    airTicks int
+    landingTicks int
+    motion string
+    jumpsUsed int
+    jumpHeld bool
+    jumpNow bool
+	idleFrames = []int{0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 2, 2, 2, 1, 1, 1, 1, 1}
+	runFrames = []int{18, 18, 19, 19, 20, 21, 21, 21, 22, 22, 24, 24, 24, 25, 25, 26, 26, 27, 27, 27, 28, 28, 23, 23, 29, 19}
+	jumpFrames = []int{30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69}
 )
 
-func jump() {
-	if onGround {
-		onGround = false
-		for i := 0; i < 9; i++ {
-			changeYpos 28
-			wait 0.02
-		}
-		for i := 0; i < 9; i++ {
-			changeYpos -28
-			wait 0.02
-		}
-		onGround = true
-	}
+func resetPlayer() {
+    vx = 0
+    vy = 0
+    onGround = true
+    frame = 0
+    airTicks = 0
+    landingTicks = 0
+    motion = "idle"
+    jumpsUsed = 0
+    jumpHeld = keyPressed(KeyUp) || keyPressed(KeySpace)
+    setHeading Left
+    setXYpos -250, -208.3333333333
+    setCostume idleFrames[0]
 }
 
-func slide() {
-	setSize 0.7
-	wait 0.35
-	setSize 1.2
-}
-
-func blink() {
-	for i := 0; i < 10; i++ {
-		hide
-		wait 0.05
-		show
-		wait 0.05
-	}
+func startJump() {
+    if state == "playing" && jumpsUsed < 2 {
+        jumpsUsed++
+        if jumpsUsed == 1 {
+            vy = 22
+        } else {
+            // 二段跳重新施加上冲速度，不累加，保持高度可控。
+            vy = 20
+        }
+        onGround = false
+        airTicks = 0
+        landingTicks = 0
+    }
 }
 
 onStart => {
-	onGround = true
-	invincible = false
-	setXYpos -300, -200
-	for {
-		wait 0.02
-		if state == "playing" && !invincible && touching("Obstacle") {
-			invincible = true
-			broadcast "hit"
-			blink
-			invincible = false
-		}
-	}
+    resetPlayer
+    for {
+        wait 0.02
+        jumpNow = keyPressed(KeyUp) || keyPressed(KeySpace)
+        if state == "playing" {
+            // 只响应按下沿：必须松开再按，长按不消耗两次机会。
+            if jumpNow && !jumpHeld { startJump }
+            if keyPressed(KeyRight) {
+                vx = 8
+                setHeading Left
+            } else if keyPressed(KeyLeft) {
+                vx = -8
+                setHeading Right
+            } else if onGround {
+                vx = 0
+            }
+            // 原素材默认朝左：负 heading 对应朝右，正 heading 对应朝左。
+            // 无方向输入时，保留空中水平惯性；站在地面则停下。
+            changeXpos vx
+            vy = vy - 1.2
+            changeYpos vy
+            if ypos <= -208.3333333333 {
+                if !onGround {
+                    landingTicks = 1
+                }
+                setYpos -208.3333333333
+                vy = 0
+                onGround = true
+                jumpsUsed = 0
+            } else {
+                onGround = false
+            }
+            if !onGround {
+                // 约 36 个模拟帧覆盖一次飞行，依次走完源帧 1..21。
+                index := airTicks * 21 / 36
+                if index > 20 { index = 20 }
+                if jumpsUsed == 2 {
+                    // 二段跳跳过地面蓄力帧，从源帧 8 开始快速收腿。
+                    index = 7 + airTicks * 14 / 24
+                    if index > 20 { index = 20 }
+                }
+                setCostume jumpFrames[index]
+                airTicks++
+                motion = "air"
+            } else if landingTicks > 0 && vx == 0 {
+                index := 21 + (landingTicks - 1)
+                if index > 39 { index = 39 }
+                setCostume jumpFrames[index]
+                landingTicks++
+                if landingTicks > 19 { landingTicks = 0 }
+                motion = "landing"
+                frame = 0
+            } else if vx != 0 {
+                landingTicks = 0
+                if motion != "run" { frame = 0 }
+                setCostume runFrames[frame % len(runFrames)]
+                frame++
+                motion = "run"
+            } else {
+                if motion != "idle" { frame = 0 }
+                setCostume idleFrames[frame % len(idleFrames)]
+                frame++
+                motion = "idle"
+            }
+        }
+        jumpHeld = jumpNow
+    }
 }
 
+onMsg "restart", => { resetPlayer }
+onMsg "start", => {
+    if state == "menu" || state == "playing" { resetPlayer }
+}
 onKey KeySpace, => {
-	if state == "menu" {
-		broadcast "start"
-	} else if state == "playing" {
-		jump
-	}
+    if state == "menu" { broadcast "start" }
 }
-
-onKey KeyUp, => {
-	if state == "playing" {
-		jump
-	}
-}
-
-onKey KeyDown, => {
-	if state == "playing" {
-		slide
-	}
-}
-
 onKey KeyEscape, => {
-	if state == "playing" || state == "paused" {
-		broadcast "pause"
-	}
+    if state == "playing" || state == "paused" { broadcast "pause" }
 }
-
 onKey KeyQ, => {
-	if state == "paused" {
-		broadcast "toMenu"
-	}
+    if state == "paused" { broadcast "toMenu" }
 }
-
 onKey KeyR, => {
-	if state == "dead" {
-		broadcast "restart"
-	}
+    if state == "dead" { broadcast "restart" }
 }
-
 onKey KeyM, => {
-	if state == "dead" {
-		broadcast "toMenu"
-	}
+    if state == "dead" { broadcast "toMenu" }
 }

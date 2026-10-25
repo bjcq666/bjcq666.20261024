@@ -1,26 +1,719 @@
 {
-	"heading": 90,
-	"x": -300,
-	"y": -200,
-	"size": 1.2,
-	"rotationStyle": "left-right",
-	"physicsMode": "no",
-	"costumeIndex": 0,
-	"visible": true,
-	"isDraggable": false,
-	"collisionPivot": {"x": 0, "y": 0},
-	"collisionShapeType": "none",
-	"collisionShapeParams": [],
-	"costumes": [
-		{
-			"x": 50,
-			"y": 50,
-			"faceRight": 0,
-			"bitmapResolution": 1,
-			"name": "idle",
-			"path": "Player.svg",
-			"imageWidth": 100,
-			"imageHeight": 100
-		}
-	]
+  "heading": 90,
+  "x": -250,
+  "y": -208.3333333333,
+  "size": 0.48,
+  "rotationStyle": "left-right",
+  "physicsMode": "no",
+  "costumeIndex": 0,
+  "visible": true,
+  "isDraggable": false,
+  "collisionPivot": {
+    "x": 0,
+    "y": 0
+  },
+  "collisionShapeType": "none",
+  "collisionShapeParams": [],
+  "costumes": [
+    {
+      "name": "Idle--02",
+      "path": "imported/Idle--02.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Idle--03",
+      "path": "imported/Idle--03.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Idle--04",
+      "path": "imported/Idle--04.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Idle--05",
+      "path": "imported/Idle--05.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Idle--06",
+      "path": "imported/Idle--06.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Idle--07",
+      "path": "imported/Idle--07.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--01",
+      "path": "imported/Run--01.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--02",
+      "path": "imported/Run--02.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--03",
+      "path": "imported/Run--03.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--04",
+      "path": "imported/Run--04.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--05",
+      "path": "imported/Run--05.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--06",
+      "path": "imported/Run--06.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--07",
+      "path": "imported/Run--07.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--08",
+      "path": "imported/Run--08.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--09",
+      "path": "imported/Run--09.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--10",
+      "path": "imported/Run--10.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--11",
+      "path": "imported/Run--11.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--12",
+      "path": "imported/Run--12.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--14",
+      "path": "imported/Run--14.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--15",
+      "path": "imported/Run--15.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--16",
+      "path": "imported/Run--16.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--17",
+      "path": "imported/Run--17.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--18",
+      "path": "imported/Run--18.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--24",
+      "path": "imported/Run--24.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--19",
+      "path": "imported/Run--19.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--20",
+      "path": "imported/Run--20.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--21",
+      "path": "imported/Run--21.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--22",
+      "path": "imported/Run--22.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--23",
+      "path": "imported/Run--23.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Run--25",
+      "path": "imported/Run--25.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--1",
+      "path": "imported/Jump--1.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--2",
+      "path": "imported/Jump--2.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--3",
+      "path": "imported/Jump--3.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--4",
+      "path": "imported/Jump--4.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--5",
+      "path": "imported/Jump--5.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--6",
+      "path": "imported/Jump--6.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--7",
+      "path": "imported/Jump--7.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--8",
+      "path": "imported/Jump--8.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--9",
+      "path": "imported/Jump--9.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--10",
+      "path": "imported/Jump--10.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--11",
+      "path": "imported/Jump--11.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--12",
+      "path": "imported/Jump--12.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--13",
+      "path": "imported/Jump--13.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--14",
+      "path": "imported/Jump--14.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--15",
+      "path": "imported/Jump--15.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--16",
+      "path": "imported/Jump--16.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--17",
+      "path": "imported/Jump--17.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--18",
+      "path": "imported/Jump--18.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--19",
+      "path": "imported/Jump--19.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--20",
+      "path": "imported/Jump--20.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--21",
+      "path": "imported/Jump--21.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--22",
+      "path": "imported/Jump--22.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--23",
+      "path": "imported/Jump--23.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--24",
+      "path": "imported/Jump--24.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--25",
+      "path": "imported/Jump--25.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--26",
+      "path": "imported/Jump--26.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--27",
+      "path": "imported/Jump--27.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--28",
+      "path": "imported/Jump--28.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--29",
+      "path": "imported/Jump--29.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--30",
+      "path": "imported/Jump--30.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--31",
+      "path": "imported/Jump--31.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--32",
+      "path": "imported/Jump--32.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--33",
+      "path": "imported/Jump--33.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--34",
+      "path": "imported/Jump--34.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--35",
+      "path": "imported/Jump--35.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--36",
+      "path": "imported/Jump--36.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--37",
+      "path": "imported/Jump--37.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--38",
+      "path": "imported/Jump--38.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--39",
+      "path": "imported/Jump--39.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    },
+    {
+      "name": "Jump--40",
+      "path": "imported/Jump--40.png",
+      "x": 240,
+      "y": 260,
+      "bitmapResolution": 1,
+      "faceRight": 0,
+      "imageWidth": 480,
+      "imageHeight": 270
+    }
+  ]
 }

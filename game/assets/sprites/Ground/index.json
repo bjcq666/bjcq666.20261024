@@ -1,0 +1,29 @@
+{
+  "heading": 90,
+  "x": 0,
+  "y": -254.16666666666666,
+  "size": 0.8333333333333334,
+  "rotationStyle": "normal",
+  "physicsMode": "no",
+  "costumeIndex": 0,
+  "visible": true,
+  "isDraggable": false,
+  "collisionPivot": {
+    "x": 0,
+    "y": 0
+  },
+  "collisionShapeType": "none",
+  "collisionShapeParams": [],
+  "costumes": [
+    {
+      "x": 480,
+      "y": 55,
+      "faceRight": 0,
+      "bitmapResolution": 1,
+      "name": "default",
+      "path": "Ground.svg",
+      "imageWidth": 960,
+      "imageHeight": 110
+    }
+  ]
+}
