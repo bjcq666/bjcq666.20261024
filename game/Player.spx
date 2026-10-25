@@ -88,14 +88,6 @@ onStart => {
             setXpos nextX
             vy = vy - 1.2
             nextY := oldY + vy
-            if vy > 0 {
-                for i := 0; i < len(ceilingLeft); i++ {
-                    if nextX + playerHalfWidth > ceilingLeft[i] && nextX - playerHalfWidth < ceilingRight[i] && oldY + playerHeight <= ceilingBottom[i] + 0.1 && nextY + playerHeight > ceilingBottom[i] {
-                        nextY = ceilingBottom[i] - playerHeight
-                        vy = 0
-                    }
-                }
-            }
             landed := false
             if vy <= 0 {
                 for i := 0; i < len(blockLeft); i++ {

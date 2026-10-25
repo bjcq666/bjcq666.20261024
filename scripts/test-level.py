@@ -43,8 +43,6 @@ def num(name):
 
 
 LEFT, RIGHT, TOP = arr("blockLeft"), arr("blockRight"), arr("blockTop")
-CLEFT, CRIGHT = arr("ceilingLeft"), arr("ceilingRight")
-CBOT, CTOP = arr("ceilingBottom"), arr("ceilingTop")
 LEVEL_START = num("levelStart")
 LEVEL_LEN = num("levelLength")
 LEVEL_END = LEVEL_START + LEVEL_LEN
@@ -52,44 +50,69 @@ LEVEL_END = LEVEL_START + LEVEL_LEN
 # ---------------------------------------------------------------- table shape
 assert len(LEFT) == len(RIGHT) == len(TOP), "block tables must match"
 assert all(r > l for l, r in zip(LEFT, RIGHT)), "block right must exceed left"
-assert len(CLEFT) == len(CRIGHT) == len(CBOT) == len(CTOP), "ceiling tables must match"
-assert all(cr > cl for cl, cr in zip(CLEFT, CRIGHT)), "ceiling right must exceed left"
-assert all(ct > cb for cb, ct in zip(CBOT, CTOP)), "ceiling top must exceed bottom"
-assert LEFT[0] <= LEVEL_START and RIGHT[-1] >= LEVEL_END, "level must be fully covered"
+assert all(r > l for l, r in zip(LEFT, RIGHT)), "block right must exceed left"
+
+
+def inside(i, j):
+    """块 i 是否整段落在块 j 里（= 房顶小屋），且比 j 高。"""
+    return LEFT[j] <= LEFT[i] and RIGHT[i] <= RIGHT[j] and TOP[i] > TOP[j]
+
+
+# 块表里既有楼顶也有房顶小屋：小屋是"贴在某栋楼顶上的窄高块"，
+# 所以允许重叠，但必须是"整段包含 + 更高"，而且每个小屋都要挂在某栋楼上。
+ROOFS, ROOMS = [], []
+for i in range(len(LEFT)):
+    host = next((j for j in range(len(LEFT)) if j != i and inside(i, j)
+                 and RIGHT[j] - LEFT[j] > RIGHT[i] - LEFT[i]), None)
+    if host is None:
+        ROOFS.append(i)
+    else:
+        ROOMS.append((i, host))
+assert ROOFS, "no roofs"
+assert LEFT[ROOFS[0]] <= LEVEL_START and RIGHT[ROOFS[-1]] >= LEVEL_END, "level must be covered"
+for k in range(len(ROOFS) - 1):
+    a, b = ROOFS[k], ROOFS[k + 1]
+    assert LEFT[b] >= RIGHT[a], f"roofs {k} and {k + 1} overlap"
 
 gaps = []
-for i in range(len(LEFT) - 1):
-    gap = LEFT[i + 1] - RIGHT[i]
-    assert gap >= 0, f"blocks {i} and {i + 1} overlap by {-gap}px"
-    if gap > 0:
-        gaps.append((RIGHT[i], LEFT[i + 1], gap))
+for k in range(len(ROOFS) - 1):
+    a, b = ROOFS[k], ROOFS[k + 1]
+    gaps.append((RIGHT[a], LEFT[b], LEFT[b] - RIGHT[a]))
 
 # --------------------------------------------------------------- jump envelope
 APEX = VY0 * VY0 / (2 * GRAVITY)     # highest point of a jump
 AIR_TICKS = 2 * VY0 / GRAVITY        # airtime back to the takeoff height
 REACH = AIR_TICKS * VX               # horizontal reach of one jump
-MAX_GAP = REACH - 2 * HALF_W - 40    # margin for takeoff/landing edges
+SINGLE_GAP = REACH - 2 * HALF_W - 40   # 单跳能过的最宽空隙
+MAX_GAP = SINGLE_GAP + 460             # 二段跳还能再补一段水平距离
 MAX_RISE = APEX - 40
 
+need_double = 0
 for i, (l, r, gap) in enumerate(gaps):
     assert gap <= MAX_GAP, f"alley {l:.0f}..{r:.0f} = {gap:.0f}px exceeds {MAX_GAP:.0f}px"
+    if gap > SINGLE_GAP:
+        need_double += 1
 for i in range(len(LEFT) - 1):
     rise = TOP[i + 1] - TOP[i]
     if RIGHT[i] == LEFT[i + 1]:
         assert rise <= MAX_RISE, f"step at x={LEFT[i + 1]:.0f} rises {rise:.0f}px"
 
-for i, (cl, cr, cb, ct) in enumerate(zip(CLEFT, CRIGHT, CBOT, CTOP)):
-    roofs = [t for l, r, t in zip(LEFT, RIGHT, TOP) if r > cl and l < cr]
-    assert roofs, f"ceiling {i} hangs over nothing"
-    low = min(roofs)
-    assert cb - low >= 120, f"ceiling {i} only {cb - low:.0f}px above the roof"
-    assert cb - low <= APEX + 60, f"ceiling {i} is unreachable, so pointless"
+# 房顶小屋：既够得着（能跳上去），又不会高到跳不过
+for i, host in ROOMS:
+    rise = TOP[i] - TOP[host]
+    # 小屋故意做得"单跳勉强、二段跳轻松"：上限取单跳峰值附近
+    assert rise <= APEX - 8, f"room at x={LEFT[i]:.0f} rises {rise:.0f}px, above the jump apex"
+    assert rise >= 100, f"room at x={LEFT[i]:.0f} only rises {rise:.0f}px, pointless"
+    assert RIGHT[i] - LEFT[i] >= 140, f"room at x={LEFT[i]:.0f} too narrow to land on"
 
 
-def step(x, y, vy, vx, jump):
+def step(x, y, vy, vx, jump, air=False):
     """One tick of Player.spx's integration, in the same order."""
-    if jump and vy <= 0:
-        vy = VY0
+    if jump:
+        if air:
+            vy = VY0 - 2.0        # 二段跳冲量略小
+        elif vy <= 0:
+            vy = VY0
     nx = x + vx
     for l, r, t in zip(LEFT, RIGHT, TOP):
         if y < t - 0.1 and y + HEIGHT > -300:
@@ -100,12 +123,6 @@ def step(x, y, vy, vx, jump):
     nx = min(LEVEL_END, max(LEVEL_START, nx))
     vy -= GRAVITY
     ny = y + vy
-    if vy > 0:
-        for cl, cr, cb in zip(CLEFT, CRIGHT, CBOT):
-            if (nx + HALF_W > cl and nx - HALF_W < cr
-                    and y + HEIGHT <= cb + 0.1 and ny + HEIGHT > cb):
-                ny = cb - HEIGHT
-                vy = 0
     landed = False
     if vy <= 0:
         for l, r, t in zip(LEFT, RIGHT, TOP):
@@ -116,25 +133,74 @@ def step(x, y, vy, vx, jump):
 
 
 # --------------------------------------------------------------- playthrough
+def supported_at(px, py):
+    return any(l <= px + HALF_W and px - HALF_W < r and abs(t - py) < 1.0
+               for l, r, t in zip(LEFT, RIGHT, TOP))
+
+
+def next_rise(px, py, horizon):
+    """前方 horizon 内最高的、比当前更高的楼顶。"""
+    best = None
+    for l, r, t in zip(LEFT, RIGHT, TOP):
+        if px < l <= px + horizon and t > py + 1.0:
+            if best is None or t > best:
+                best = t
+    return best
+
+
 x, y, vy, ground = LEVEL_START, TOP[0], 0.0, True
+jumps = 0
 ticks = 0
-while x < LEVEL_END and ticks < 6000:
+while x < LEVEL_END and ticks < 9000:
     jump = False
+    air = False
     if ground:
-        # jump when the roof under the feet ends soon, or a higher roof starts soon
+        jumps = 0
         probe = x + 70
-        still_supported = any(l <= probe + HALF_W and probe - HALF_W < r and abs(t - y) < 0.5
-                              for l, r, t in zip(LEFT, RIGHT, TOP))
-        rise_ahead = any(x < l <= x + 140 and t > y + 0.1 for l, t in zip(LEFT, TOP))
-        jump = (not still_supported) or rise_ahead
-    x, y, vy, ground = step(x, y, vy, VX, jump)
+        gap_ahead = not supported_at(probe, y)
+        rise = next_rise(x, y, 260)
+        if gap_ahead or rise is not None:
+            jump = True
+            jumps = 1
+    else:
+        # 空中：越过不去的坎就用二段跳（这正是关卡设计想逼出来的操作）
+        if jumps == 1 and vy < 8:
+            need = next_rise(x, y, 420)
+            if need is not None and y < need - 24:
+                jump = True
+                air = True
+                jumps = 2
+    x, y, vy, ground = step(x, y, vy, VX, jump, air)
     ticks += 1
     assert y >= -420, f"bot fell into a pit at x={x:.0f} (tick {ticks})"
 
 assert x >= LEVEL_END, f"bot stalled at x={x:.0f} after {ticks} ticks"
-print(f"jump envelope: apex {APEX:.0f}px, reach {REACH:.0f}px, "
-      f"max alley {MAX_GAP:.0f}px, max rise {MAX_RISE:.0f}px")
-print(f"bot route: {ticks} ticks ({ticks / 50:.1f}s sim) to x={x:.0f}")
+print(f"jump envelope: apex {APEX:.0f}px, single-jump reach {REACH:.0f}px, "
+      f"max alley {MAX_GAP:.0f}px ({need_double}/{len(gaps)} need a double jump), "
+      f"max rise {MAX_RISE:.0f}px")
+print(f"bot route: {ticks} ticks ({ticks / 50:.1f}s sim) to x={x:.0f}, used double jumps")
+
+# --------------------------------------------------------------- orb grids
+ORB_ROOF = [int(v) for v in re.findall(r"orbRoof = \[\]float64\{([^}]+)\}", SRC)[0].split(",")]
+ORB_SIZE = [int(v) for v in re.findall(r"orbSize = \[\]float64\{([^}]+)\}", SRC)[0].split(",")]
+ORB_STEP = 46.0
+assert len(ORB_ROOF) == len(ORB_SIZE)
+for r, cols in zip(ORB_ROOF, ORB_SIZE):
+    assert 0 <= r < len(LEFT), f"orb grid roof index {r} out of range"
+    cx = (LEFT[r] + RIGHT[r]) / 2
+    half = (cols - 1) / 2 * ORB_STEP
+    # 方阵必须完全落在楼顶横向范围内
+    assert half * 2 + 60 <= RIGHT[r] - LEFT[r], f"orb grid on roof {r} is wider than the roof"
+    # 方阵下方不能有更高的块（小屋）——否则小球会嵌进小屋里
+    for i in range(len(LEFT)):
+        if RIGHT[i] > cx - half - 10 and LEFT[i] < cx + half + 10 and TOP[i] > TOP[r] + 1:
+            raise AssertionError(
+                f"orb grid on roof {r} passes through block {i} (a rooftop room) at x={LEFT[i]:.0f}")
+# 出生台和终点台上不放积分方阵
+assert ROOFS[0] not in ORB_ROOF, "orb grid on the spawn platform"
+assert ROOFS[-1] not in ORB_ROOF, "orb grid on the finish platform"
+print(f"orb grids: {len(ORB_ROOF)} grids, clear of rooftop rooms and of the "
+      f"spawn/finish platforms")
 
 # --------------------------------------------------------------- camera 40%
 viewport = 1100.0 / 0.72
@@ -154,5 +220,6 @@ for name in ("Ground.svg", "level-background.svg"):
 print(f"map {cfg['map']['width']}x{cfg['map']['height']}, level {LEVEL_LEN:.0f}px")
 
 widest = max(g for _, _, g in gaps)
-print(f"PASS: {len(LEFT)} buildings, {len(gaps)} alleys (widest {widest:.0f}px), "
-      f"{len(CLEFT)} hanging slabs, traversable, camera at {player_share * 100:.1f}%.")
+print(f"PASS: {len(ROOFS)} rooftops + {len(ROOMS)} rooftop rooms, "
+      f"{len(gaps)} alleys (widest {widest:.0f}px), traversable, "
+      f"camera at {player_share * 100:.1f}%.")

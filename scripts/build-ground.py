@@ -90,8 +90,9 @@ def building(rnd, left, right, top):
     o.append(rect(x0, top, w, IMG_H - top, FACADE))
     # parapet, with the lit roof edge the player actually stands on
     o.append(rect(x0, top, w, 16, PARAPET))
-    o.append(rect(x0, top, w, 4, CYAN, 0.55))
+    o.append(rect(x0, top, w, 5, CYAN, 0.75))
     o.append(rect(x0, top + 16, w, 3, "#060b14"))
+    o.append(rect(x0, top + 19, w, 14, "#04070c", 0.85))   # 檐下阴影，压出"这是楼顶边缘"
     # corner edges
     o.append(rect(x0, top, 4, IMG_H - top, EDGE, 0.5))
     o.append(rect(x1 - 4, top, 4, IMG_H - top, EDGE, 0.5))
@@ -149,18 +150,54 @@ def ceiling(rnd, left, right, bottom, top):
     return o
 
 
+def rooftop_room(rnd, left, right, top, roof_top):
+    """房顶上的小房子：从自己的顶画到所在楼顶，带屋檐、门和霓虹招牌。"""
+    x0 = max(0, left + X_OFFSET)
+    x1 = min(IMG_W, right + X_OFFSET)
+    w = x1 - x0
+    if w <= 0 or roof_top <= top:
+        return []
+    o = []
+    o.append(rect(x0, top, w, roof_top - top + 6, FACADE))
+    # 屋檐
+    o.append(rect(x0 - 8, top - 10, w + 16, 12, PARAPET))
+    o.append(rect(x0 - 8, top - 10, w + 16, 3, CYAN, 0.6))
+    # 门 + 两扇窗
+    door_w = min(46, int(w * 0.3))
+    dx = x0 + (w - door_w) // 2
+    o.append(rect(dx, roof_top - 8 - 62, door_w, 62, "#0d1b2c"))
+    o.append(rect(dx, roof_top - 8 - 62, door_w, 3, EDGE, 0.8))
+    for k in range(2):
+        wx = x0 + 14 + k * (w - 40 - 26)
+        if wx + 20 < x1 - 10:
+            o.append(rect(wx, top + 22, 20, 26, CYAN, 0.32))
+    # 招牌
+    if w > 150:
+        o.append(rect(x0 + 12, top - 34, min(70, w - 24), 9, MAGENTA, 0.5))
+    return o
+
+
 def build():
     rnd = random.Random(1024)
     left = table("blockLeft")
     right = table("blockRight")
     top = table("blockTop")
 
+    def host_of(i):
+        """返回包住块 i 的那栋楼顶（= 小屋的主人）。"""
+        for j in range(len(left)):
+            if j != i and left[j] <= left[i] and right[i] <= right[j] \
+                    and top[i] > top[j] and (right[j] - left[j]) > (right[i] - left[i]):
+                return j
+        return None
+
     body = []
-    for l, r, t in zip(left, right, top):
-        body += building(rnd, l, r, Y_ORIGIN - t)
-    for l, r, b, t in zip(table("ceilingLeft"), table("ceilingRight"),
-                          table("ceilingBottom"), table("ceilingTop")):
-        body += ceiling(rnd, l, r, b, t)
+    for i, (l, r, t) in enumerate(zip(left, right, top)):
+        host = host_of(i)
+        if host is None:
+            body += building(rnd, l, r, Y_ORIGIN - t)
+        else:
+            body += rooftop_room(rnd, l, r, Y_ORIGIN - t, Y_ORIGIN - top[host])
 
     # finish beacon on the last roof, at the level end parsed from main.spx
     end = level_end()

@@ -34,6 +34,7 @@ spx 是 Scratch 兼容引擎，代码是 XGo classfile：
 | **AudioCue** | `AudioCue.spx` | 唯一音效发射源，贴着相机视口中心 | `play` / `pausePlaying` / `resumePlaying` |
 | **ScreenDim** | `ScreenDim.spx` | 转场黑罩，钉在屏幕上，`veilScale` 决定厚度 | `wipeX`、`dimOpacity`、`veilScale` |
 | **Start / Pause / Gameover** | 三个 `.spx` | 菜单面板，屏幕居中 + `GhostEffect` 淡入淡出 | `activeMenu`、`menuOpacity` |
+| **Orb** | `Orb.spx` | 积分球克隆池：方阵布点、吃到判定、重开复位 | `main.spx` 的 `orbRoof/orbSize` |
 | **Ground** | `Ground.spx` | 只负责绘图，不含逻辑 | `Ground.svg` |
 | **HUD** | `assets/index.json` 的 Monitor | 原生 UI 层，显示 `hudText` | `refreshHUD()` |
 
@@ -79,8 +80,9 @@ resumePlay(rebuild):
 
 1. **碰撞与美术同源**：`Ground.svg` 由 `scripts/build-ground.py` **解析 `main.spx`** 生成，
    不接受手改图；`scripts/test-level.py` 解析同一张表做几何断言。
-2. **跳跃包线**：`vy=22, g=1.2` → 峰值 202px、单跳水平 513px。校验脚本保证每条空隙 ≤ 445px、
-   每级高差 ≤ 162px、悬挂楼板距楼顶 120~262px。
+   "房顶小屋"不是独立系统，就是一块更窄更高的碰撞块，靠"整段落在某栋楼顶内且更高"识别。
+2. **跳跃包线**：`vy=22, g=1.2` → 峰值 202px、单跳水平 513px，二段跳合计约 905px。
+   空隙 423~545px（12 条里 8 条必须二段跳），高差 ≤ 130px，小屋比楼顶高 140~180px。
 3. **黑罩必须在菜单之下、舞台之上**：由 `assets/index.json` 的 `zorder` 保证，禁止脚本里用
    `setLayer Front` 抢层（四个精灵互相抢会变成执行顺序决定层级）。
 4. **UI 用 `viewportRect()` 定位**：`Camera.xpos` 是目标位置，相机平滑飞行时会把 UI 甩出屏幕。
@@ -92,6 +94,7 @@ resumePlay(rebuild):
 |---|---|---|
 | 单张纹理边长 | 16384px | 地图宽 + 两侧余量必须 < 16384，所以关卡长度上限约 15000 |
 | classfile 反射方法表 | 2560 | 精灵类型不能随便加（每个类都复制整套 API），必须合并复用造型 |
+| 克隆总数 | 300 | 常驻克隆（积分球 136 颗）要算进预算，长跑时不能再无脑销毁重建 |
 | 一个 classfile | 只能一个顶层 `var` 块 | 变量必须集中声明 |
 | 相机 | 自带平滑（每帧追平剩余 16%） | 一切屏幕对齐要用 `viewportRect()` + 等相机落地 |
 

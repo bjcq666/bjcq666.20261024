@@ -35,6 +35,7 @@
     "AudioCue",
     "Player",
     "Fx",
+    "Orb",
     "Chaser",
     {
       "type": "monitor",

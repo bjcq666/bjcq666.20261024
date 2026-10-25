@@ -144,8 +144,9 @@ def build():
 </linearGradient>
 <linearGradient id="depth" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0" stop-color="{STREET}" stop-opacity="0"/>
-<stop offset="0.35" stop-color="{STREET}" stop-opacity="0.55"/>
-<stop offset="1" stop-color="{STREET}" stop-opacity="0.85"/>
+<stop offset="0.18" stop-color="{STREET}" stop-opacity="0.40"/>
+<stop offset="0.34" stop-color="{STREET}" stop-opacity="0.92"/>
+<stop offset="1" stop-color="{STREET}" stop-opacity="0.97"/>
 </linearGradient>
 <linearGradient id="fadeDown" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0" stop-color="{STREET}" stop-opacity="0"/>
@@ -168,7 +169,7 @@ def build():
 
     # opaque base: the sky above was bright, everything below the skyline is a
     # dark street plane so the running band stays calm and readable
-    b.append(rect(0, 700, W, H - 700, "url(#depth)"))
+    b.append(rect(0, 520, W, H - 520, "url(#depth)"))
     b.append(rect(0, MID_BASE - 4, W, 3, "#1b3049", 1))
     rnd2 = random.Random(77)
     x = 0

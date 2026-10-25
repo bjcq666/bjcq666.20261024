@@ -6,16 +6,17 @@ var (
     levelLength = 13500
     levelStart = -6750.0
     groundY = -208.0
-    blockLeft = []float64{-7450, -6090, -4874, -3562, -2239, -1035, -116, 1147, 2272, 3182, 4244, 5512}
-    blockRight = []float64{-6431, -5204, -3851, -2580, -1377, -379, 871, 1925, 2858, 3955, 5207, 7450}
-    blockTop = []float64{-208, -206, -208, -208, -208, -180, -205, -133, -62, -89, -60, -76}
+    blockLeft = []float64{-7480, -5705, -4480, -3352, -2149, -1210, -199, 906, 2043, 3185, 4052, 5030, 5983, -5359, -4160, -3198, 183, 1014, 2175, 6064}
+    blockRight = []float64{-6250, -5019, -3820, -2690, -1654, -655, 476, 1508, 2762, 3617, 4549, 5445, 7450, -5132, -3933, -3004, 413, 1207, 2383, 6302}
+    blockTop = []float64{-208, -208, -90, -170, -48, -48, -170, -48, -130, -48, -170, -48, -90, -39, 87, 2, 9, 120, 15, 88}
     playerHalfWidth = 14.0
     playerHeight = 114.0
-    ceilingLeft = []float64{-7030, -5737, -3181, -797, 1426, 4616}
-    ceilingRight = []float64{-6850, -5557, -2961, -617, 1646, 4836}
-    ceilingBottom = []float64{27, -7, 3, -30, 68, 162}
-    ceilingTop = []float64{307, 184, 202, 180, 265, 365}
     deathY = -420.0
+    // 积分球方阵：挂在第几栋楼顶上方（楼顶索引），以及边长（3 或 5）。
+    // 出生台（第 0 栋）和终点台（最后一栋）不放，避免一开局/一结算就白送分。
+    orbRoof = []float64{4, 5, 9, 10, 11}
+    orbSize = []float64{5, 3, 5, 3, 5}
+    orbSpawned bool
     distance int
     simulationTicks int
     debugLevel = false
@@ -118,6 +119,25 @@ func glideCameraHome() {
     waitCameraStill
 }
 
+// 重新铺积分球方阵（每次重建舞台都重来一遍）
+func spawnOrbs() {
+    if orbSpawned {
+        broadcast "resetOrbs"
+        return
+    }
+    orbSpawned = true
+    for i := 0; i < len(orbRoof); i++ {
+        r := int(orbRoof[i])
+        cols := int(orbSize[i])
+        cx := (blockLeft[r] + blockRight[r]) / 2
+        cy := blockTop[r] + 90.0
+        if cols > 3 {
+            cy = blockTop[r] + 132.0
+        }
+        Orb.spawnGrid cx, cy, cols, 46
+    }
+}
+
 // Rebuild the arena. Only ever called while the veil fully covers the stage.
 func resetStage() {
     score = 0
@@ -129,7 +149,8 @@ func resetStage() {
     shakeTicks = 0
     broadcastAndWait "resetPlayer"
     broadcast "resetChaser"
-    updateCamera
+    // 相机由 glideCameraHome 分跳带回来，这里不直接甩目标点
+    spawnOrbs
     refreshHUD
 }
 
