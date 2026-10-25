@@ -11,6 +11,10 @@ var (
     blockTop = []float64{-208, -118, -208, -78, -168, -208, -98, -208, -138, -208, -108, -208, -148, -208, -88, -208}
     playerHalfWidth = 14.0
     playerHeight = 114.0
+    ceilingLeft = []float64{-4950, -2200, 1050, 3400}
+    ceilingRight = []float64{-4820, -2020, 1190, 3620}
+    ceilingBottom = []float64{130, 170, 90, 145}
+    ceilingTop = []float64{310, 310, 310, 310}
     pitBottom = -300.0
     deathY = -420.0
     distance int
