@@ -1,0 +1,27 @@
+import "fmt"
+
+// HUD 方案 A：屏幕暗角。
+//
+// 血量越低，四周的品红暗角越浓（11 档造型，scripts/build-hud.py 生成）。
+// 为什么不用血条：血条是"小而静止"的图形，世界坐标转屏幕时那 1~2px 的相位差
+// 会非常刺眼；暗角是全屏均匀渐变，同样幅度的抖动完全看不出来。
+//
+// 位置由 main.spx 的 placeHud 在相机更新的同一个 tick 里设置，保证相位一致。
+
+onStart => {
+    hide
+    for {
+        wait 0.02
+        setSize 1 / cameraZoom
+        step := int(health / 10)
+        if step < 0 { step = 0 }
+        if step > 10 { step = 10 }
+        setCostume "hp" + fmt.Sprintf("%d", step * 10)
+        if state == "playing" && step < 10 {
+            setGraphicEffect GhostEffect, 0
+            show
+        } else {
+            hide
+        }
+    }
+}

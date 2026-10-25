@@ -1,0 +1,21 @@
+{
+  "heading": 90,
+  "x": 0,
+  "y": 0,
+  "size": 1.8,
+  "rotationStyle": "normal",
+  "physicsMode": "no",
+  "visible": true,
+  "costumeIndex": 0,
+  "costumes": [
+    {
+      "name": "dim",
+      "path": "dim.svg",
+      "x": 1300,
+      "y": 900,
+      "bitmapResolution": 1,
+      "imageWidth": 2600,
+      "imageHeight": 1800
+    }
+  ]
+}

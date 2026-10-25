@@ -1,85 +1,62 @@
 {
-	"backdrops": [
-		{
-			"x": 480,
-			"y": 360,
-			"bitmapResolution": 1,
-			"name": "neon",
-			"path": "backdrop.svg",
-			"imageWidth": 960,
-			"imageHeight": 720
-		}
-	],
-	"backdropIndex": 0,
-	"map": {
-		"width": 960,
-		"height": 720,
-		"mode": "fillRatio"
-	},
-	"physics": false,
-	"layerSortMode": "",
-	"autoSetCollisionLayer": true,
-	"audioAttenuation": 0,
-	"audioMaxDistance": 768,
-	"run": {
-		"width": 960,
-		"height": 720
-	},
-	"camera": {
-		"on": ""
-	},
-	"stretchMode": true,
-	"windowScale": 1,
-	"zorder": [
-		{
-			"type": "monitor",
-			"name": "score",
-			"size": 1,
-			"target": "",
-			"val": "getVar:score",
-			"color": 15629590,
-			"label": "分数",
-			"mode": 1,
-			"x": -470,
-			"y": 340,
-			"visible": true
-		},
-		{
-			"type": "monitor",
-			"name": "time",
-			"size": 1,
-			"target": "",
-			"val": "getVar:elapsed",
-			"color": 15629590,
-			"label": "时间",
-			"mode": 1,
-			"x": -55,
-			"y": 340,
-			"visible": true
-		},
-		{
-			"type": "monitor",
-			"name": "lives",
-			"size": 1,
-			"target": "",
-			"val": "getVar:lives",
-			"color": 15629590,
-			"label": "生命",
-			"mode": 1,
-			"x": 365,
-			"y": 340,
-			"visible": true
-		},
-		"Obstacle",
-		"Coin",
-		"Start",
-		"Gameover",
-		"Pause",
-		"Player"
-	],
-	"maxFPS": 60,
-	"fontPreferences": [
-		"basic-chinese",
-		"default"
-	]
+  "backdrops": [
+    {
+      "x": 7500,
+      "y": 700,
+      "bitmapResolution": 1,
+      "name": "level",
+      "path": "level-background.svg",
+      "imageWidth": 15000,
+      "imageHeight": 1400
+    }
+  ],
+  "backdropIndex": 0,
+  "map": {
+    "width": 15000,
+    "height": 1400,
+    "mode": "actualSize"
+  },
+  "physics": false,
+  "layerSortMode": "",
+  "autoSetCollisionLayer": true,
+  "audioAttenuation": 0,
+  "audioMaxDistance": 100000,
+  "run": {
+    "width": 1100,
+    "height": 825
+  },
+  "camera": {
+    "on": ""
+  },
+  "stretchMode": true,
+  "windowScale": 1,
+  "zorder": [
+    {
+      "type": "monitor",
+      "name": "hpView",
+      "size": 1,
+      "target": "",
+      "val": "getVar:hpText",
+      "label": "HP",
+      "mode": 1,
+      "style": "default",
+      "x": -500,
+      "y": 380,
+      "visible": false
+    },
+    "Ground",
+    "AudioCue",
+    "Player",
+    "Fx",
+    "Orb",
+    "Chaser",
+    "Hud",
+    "ScreenDim",
+    "Menu"
+  ],
+  "maxFPS": 60,
+  "fontPreferences": [
+    "basic-chinese",
+    "default"
+  ]
 }

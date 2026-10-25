@@ -1,146 +1,127 @@
 # 架构设计 · 疾风行者
 
-> 模块规格、数据流、素材管线、分工与开发流程
+> 模块规格、数据流、关键不变量、素材管线
 
 ## 1. 设计目标与约束
 
-- **目标**：2 天 1 晚内交付一款可玩、有打磨、可在线试玩的横向跑酷游戏。
-- **约束**：个人参赛；无既有 codebase；以 XBuilder（spx）为引擎。
-- **设计原则**：
-  1. 玩法聚焦（无限跑酷），内容可控；
-  2. 模块解耦（事件驱动），便于并行与迭代；
-  3. 全部变更走 PR，保留过程痕迹；
-  4. AI 深度参与开发，过程可量化复盘。
+- **目标**：2 天 1 晚交付一款可玩、有打磨的楼顶跑酷。
+- **约束**：个人参赛；无既有 codebase；引擎为 XBuilder（spx）；引擎有几条硬限制（见 §6）。
+- **设计原则**
+  1. **数据单一真源**：关卡几何只写在 `main.spx` 的矩形表里，美术由脚本读同一张表生成，
+     校验脚本也读同一张表——三者不可能漂移。
+  2. **状态机优先**：玩法与转场都用显式状态（`state`、`phase`）表达，不用时间猜测。
+  3. **一切可复现**：地形、背景、音效、菜单图全部由 `scripts/` 生成，改参数重跑即可。
+  4. **失败要静默可见**：所有"看不见"的坐标/尺寸计算都有实测依据，见 `docs/ENGINE-NOTES.md`。
 
 ## 2. 运行时架构（spx）
 
-spx 是 Scratch 兼容的 2D 引擎，基于 XGo classfile：
+spx 是 Scratch 兼容引擎，代码是 XGo classfile：
 
-- **Game（舞台 / project class）**：`main.spx`，全局唯一，保存全局状态与舞台逻辑；
-- **Sprite（worker class）**：每个精灵一个 `.spx` 文件，各自独立，可用 `clone` 复制；
-- **事件驱动**：`onStart` / `onKey` / `onMsg` / `onClick` / `onTouchStart` / `onCloned`；
-- **消息总线**：`broadcast` / `onMsg` 解耦精灵间通信；
-- **资源**：`assets/index.json` 统一描述造型 / 动画 / 背景 / 声音。
+- **Game（舞台）**：`main.spx`，全局唯一，存全局状态与主循环；
+- **Sprite（角色类）**：每个 `.spx` 一个类，多个实例/克隆；
+- **事件**：`onStart` / `onKey` / `onMsg` / `onClick` / `onCloned`；
+- **消息**：`broadcast` / `broadcastAndWait` 解耦精灵；
+- **资源**：`assets/index.json` 描述地图、底图、`zorder`（绘制顺序）、HUD Monitor、音频参数。
 
 ## 3. 模块划分
 
-| 模块 | 文件 | 职责 | 关键事件 / 依赖 |
+| 模块 | 文件 | 职责 | 关键依赖 |
 |---|---|---|---|
-| **Game / 舞台** | `main.spx` | 全局状态、生成调度、背景滚动、UI、开始 / 结束 | `onStart`、`broadcast` |
-| **Player 主角** | `Player.spx` | 输入、位移、跳跃 / 滑铲 / 二段跳、碰撞、动画、无敌帧 | `onKey`、`onTouchStart` |
-| **Obstacle 障碍** | `Obstacle.spx` | 克隆、移动、回收、类型（地面 / 低空） | `onCloned`、`onMsg` |
-| **Coin 能量** | `Coin.spx` | 克隆、移动、收集、combo | `onCloned`、`onMsg` |
-| **Background 背景** | `Background.spx` | 视差滚动、主题切换 | 由 Game 驱动 |
-| **UI / HUD** | `main.spx` + Monitor | 分数 / 速度 / 连击 / 最高分 | 数据来自 Game |
-| *(可选) AI 教练* | `AICoach.spx` | `ai.Player` 实时点评 | 暂不纳入 MVP |
+| **舞台 / Game** | `main.spx` | 关卡矩形表、相机、`state` 状态机、黑罩转场、HUD 文本、舞台重建 | `Camera.viewportRect`、`getWidget(Monitor,"fixedHUD")` |
+| **Player** | `Player.spx` | 输入、轴向分离碰撞、跳跃/二段跳、逐帧动画、坠落判死、被追上判死 | `main.spx` 的矩形表、`Fx`、`AudioCue` |
+| **Chaser** | `Chaser.spx` | 四段状态机（chase/out/dash/surge）、悬停跟随、碰撞判定、尾焰发射 | `Player.xpos/ypos`、`Fx`、`broadcast "caught"` |
+| **Fx** | `Fx.spx` | 粒子克隆池，5 种造型：`spark`/`bit`/`trailUp`/`trailDown`/`trailFlat` | 由 Player / Chaser 调用 |
+| **AudioCue** | `AudioCue.spx` | 唯一音效发射源，贴着相机视口中心 | `play` / `pausePlaying` / `resumePlaying` |
+| **ScreenDim** | `ScreenDim.spx` | 转场黑罩，钉在屏幕上，`veilScale` 决定厚度 | `wipeX`、`dimOpacity`、`veilScale` |
+| **Start / Pause / Gameover** | 三个 `.spx` | 菜单面板，屏幕居中 + `GhostEffect` 淡入淡出 | `activeMenu`、`menuOpacity` |
+| **Orb（道具）** | `Orb.spx` | 3 个造型共用一个类：积分球（`orb`）/ 炮塔（`base`）/ 炮弹（`bullet`），靠 `costumeName` 分流 | `main.spx` 的 `orbRoof/orbSize/turretRoof`、`Player`、`Fx` |
+| **Ground** | `Ground.spx` | 只负责绘图，不含逻辑 | `Ground.svg` |
+| **Hud** | `Hud.spx` | 血量暗角（11 张连屏渐变造型），位置由 `placeHud` 在相机同一 tick 设置 | `health`、`Camera.viewportRect` |
+| **Menu** | `Menu.spx` | 开始 / 暂停 / 结算三块面板合成一个精灵，靠造型区分；结算用 `say` 播报得分与死亡数 | `activeMenu`、`menuOpacity` |
+| **血量数值** | `assets/index.json` 的 Monitor `hpView` | 原生 UI，显示 `hpText`，必须显式跟随 `state` 显隐 | `refreshHUD()`、`syncHudView()` |
 
 ## 4. 数据流与关键契约
 
-### 4.1 全局状态（`main.spx` 的 `var`）
+### 4.1 全局状态（`main.spx`）
 
-| 变量 | 类型 | 说明 |
-|---|---|---|
-| `score` | int | 当前分数 |
-| `best` | int | 最高分（本地持久化） |
-| `speed` | int | 当前滚动速度 |
-| `combo` | int | 连击数 |
-| `state` | string | `menu` / `playing` / `dead` |
+| 变量 | 说明 |
+|---|---|
+| `levelLength = 13500` / `levelStart = -6750` | 关卡区间，进度 = `xpos - levelStart` |
+| `blockLeft/Right/Top` | 12 栋楼的矩形表（碰撞 + 美术的唯一真源） |
+| `ceilingLeft/Right/Bottom/Top` | 6 组悬挂楼板 |
+| `state` | `menu` / `playing` / `paused` / `dead` / `won` / `transition` |
+| `uiBusy` | 转场互斥锁，期间忽略所有输入 |
+| `wipeX` / `dimOpacity` / `veilScale` | 黑罩的水平偏移 / 不透明度 / 厚度倍率 |
+| `menuOpacity` / `activeMenu` | 面板淡入淡出与当前面板 |
+| `shakeTicks` | 镜头抖动的剩余帧数 |
+| `score` / `distance` / `elapsed` / `health` / `best` | 计分与 HUD 数据 |
 
 ### 4.2 事件契约
 
-| 事件 | 载荷 | 发布者 | 订阅者 |
+| 消息 | 发布者 | 订阅者 | 含义 |
 |---|---|---|---|
-| `gameStart` | — | Game | Player / Obstacle / Coin |
-| `hit` | — | Player | Game（扣命 / 结束） |
-| `coin` | — | Coin | Game（加分 / combo） |
-| `gameOver` | — | Game | 全部（重置） |
-| `spawn` | — | Game | Obstacle / Coin |
+| `start` / `restart` | 面板点击、`Space`、`R` | Game | 开始 / 重开（→ `resumePlay(true)`） |
+| `pause` | `ESC` | Game | 暂停 ↔ 继续（继续走 `resumePlay(false)`，不重置） |
+| `toMenu` | `Q` / `M` | Game | 切到主菜单（黑罩已在位，不再滑入） |
+| `finish` | Player 到达终点 | Game | 结算 |
+| `caught` | Chaser 撞到玩家 / 血量归零 | Player | 死亡序列（先锁 `state`，再音效/粒子/抖动/开结算） |
+| `hurt` | 炮弹命中、撞毁炮塔 | Player | 扣 25 血（8 帧冷却）、`hurt` 音效、抖动；归零转 `caught` |
+| `resetOrbs` / `resetTurrets` | `resetStage()` | Orb | 只复位对应造型的克隆（`taken/dead = false` + `show`） |
+| `resetPlayer` / `resetChaser` | `resetStage()` | Player / Chaser | 舞台重建时各自复位 |
 
-### 4.3 碰撞与状态机
-
-- `Player` 每帧检测 `touching("Obstacle")` → 触发 `hit`；
-- 状态机：`menu` → `playing` → `dead` → `menu`；
-- 无敌帧：受击后短暂闪烁、免伤。
-
-## 5. 素材管线
-
-- **来源**：XBuilder 内置「AI 生成」 + 简单 SVG 色块；或 Kenney CC0 素材包；
-- **格式**：PNG（角色 / 障碍 / 金币）、SVG（背景 / 地面）、MP3/WAV（音效）；
-- **规范**：统一 1x 分辨率、命名 `kebab-case`、在 `assets/index.json` 注册；
-- **授权**：所有第三方素材记录在 `docs/ASSETS.md`。
-
-## 6. 仓库结构
+### 4.3 转场时序（唯一允许的重建窗口）
 
 ```
-.
-├── README.md
-├── ARCHITECTURE.md
-├── PLAN.md
-├── game/
-│   ├── main.spx
-│   ├── Player.spx
-│   ├── Obstacle.spx
-│   ├── Coin.spx
-│   ├── Background.spx
-│   ├── builder-meta.json
-│   └── assets/
-├── scripts/
-├── docs/
-│   ├── GAMEPLAY.md
-│   ├── AI_PROCESS.md
-│   └── ASSETS.md
-└── .github/
-    └── PULL_REQUEST_TEMPLATE.md
+openMenu(target):  黑罩滑入 → 停住 → 面板在黑罩之上淡入 → 常驻
+resumePlay(rebuild):
+    面板淡出 → (需要重建时)本体重建舞台 + 等相机落地 → 黑罩加厚/恢复 → 黑罩滑出 → 恢复玩法
 ```
 
-## 7. 模块规格（接口约定）
+重建（`resetStage`：清零计分、人物回起点、相机目标复位）**只发生在黑罩完全遮住舞台之后**，
+所以玩家永远看不到重置过程；相机从死亡点飞回起点的那段飞行也藏在黑罩后面。
 
-每个模块以「职责 / 输入 / 输出 / 依赖」描述，详见各 `.spx` 文件头注释。核心约定：
+## 5. 关键不变量
 
-- 精灵只通过 `broadcast` / `onMsg` 通信，不直接跨文件改状态；
-- 全局状态只在 `main.spx` 声明，精灵通过 `onMsg` 或共享变量读写；
-- 对象池：`Obstacle` / `Coin` 用 `clone` 生成，超出屏幕后 `die` 回收。
+1. **碰撞与美术同源**：`Ground.svg` 由 `scripts/build-ground.py` **解析 `main.spx`** 生成，
+   不接受手改图；`scripts/test-level.py` 解析同一张表做几何断言。
+   "房顶小屋"不是独立系统，就是一块更窄更高的碰撞块，靠"整段落在某栋楼顶内且更高"识别。
+2. **跳跃包线**：`vy=22, g=1.2` → 峰值 202px、单跳水平 513px，二段跳合计约 905px。
+   空隙 423~545px（12 条里 8 条必须二段跳），高差 ≤ 130px，小屋比楼顶高 140~180px。
+3. **黑罩必须在菜单之下、舞台之上**：由 `assets/index.json` 的 `zorder` 保证，禁止脚本里用
+   `setLayer Front` 抢层（四个精灵互相抢会变成执行顺序决定层级）。
+4. **屏幕元素与相机同 tick 定位**：`Camera.xpos` 是目标位置（相机会滞后），`viewportRect()`
+   是上一帧的实际相机；**小而静止**的屏幕元素如果自己跑循环摆位，会因相位差抖动 1~2px。
+   要么放进相机更新的同一个 tick（`placeHud`），要么做成大面积图形（暗角、遮罩），
+   要么干脆用原生 UI（监视器）。
+5. **原生监视器盖在所有精灵之上**，黑罩盖不住它，必须显式 `show/hide`（`syncHudView`）。
+6. **音效只从 `AudioCue` 发射**，且 `audioMaxDistance` 必须远大于地图宽度，否则会被 2D 距离裁切。
+7. **持久道具用 hide 而不是 destroy**：积分球、炮塔都是常驻克隆，用掉后 `hide`，
+   重开时广播复位。若"销毁 + 重建"，上一局残留 + 新建会顶到克隆上限 300，部分道具静默不生成。
 
-## 8. 分工（个人）
+## 6. 引擎硬限制（决定了很多实现细节）
 
-| 角色 | 负责内容 |
-|---|---|
-| 产品设计 | 玩法、数值、关卡节奏、UI/UX |
-| 工程实现 | spx 模块开发、性能、Web 构建 |
-| 素材 / 美术 | 素材生成 / 整合、视觉风格统一 |
-| AI 工程 | 工作流搭建、提示词、过程留痕（`docs/AI_PROCESS.md`） |
-| 文档 / 交付 | README、架构、demo 视频、部署 |
-
-## 9. 开发流程
-
-- **分支**：`main` 主干；`feat/*`、`fix/*`、`docs/*`；
-- **PR**：每个变更一个 PR，Squash 合并，模板见 `.github/PULL_REQUEST_TEMPLATE.md`；
-- **提交**：Conventional Commits（`feat:` / `fix:` / `docs:` / `chore:`）；
-- **tag**：`v0`（初始化）→ `v0.1` → …；
-- **CI（可选）**：GitHub Actions 跑 `spx` 构建检查。
-
-## 10. AI 辅助工作流
-
-- **工具**：DSH（DeepSeek Harness）+ 两个 skill（`xgo-language`、`spx-project`）+ 本地 `spx run`；
-- **标准套路**：
-  1. 设计 / 拆模块 →
-  2. 本地写 `.spx`（文件工具）→
-  3. `spx run` 秒级测试 →
-  4. 小步 PR →
-  5. 素材经 XBuilder 生成 / 预览；
-- **记录**：`docs/AI_PROCESS.md` 记录目标、prompt 要点、产出、效率观察。
-
-## 11. 风险与取舍
-
-| 风险 | 应对 |
-|---|---|
-| 时间紧（2 天 1 晚） | 砍掉游戏内 AI、多关卡、联网排行；聚焦无限跑酷 |
-| 素材制作耗时 | CC0 素材 / AI 生成，零手绘 |
-| Web 构建不确定 | Day 2 提前验证 `spx buildweb` |
-| 部署失败 | 本地演示兜底 + GitHub Pages |
-
-## 12. 版本记录
-
-| 版本 | 日期 | 内容 |
+| 限制 | 数值 | 影响 |
 |---|---|---|
-| v0 | 2026-10-24 | 仓库初始化、结构、文档骨架 |
+| 单张纹理边长 | 16384px | 地图宽 + 两侧余量必须 < 16384，所以关卡长度上限约 15000 |
+| classfile 反射方法表 | 2560 | **实测 11 个精灵类型就会启动失败**（10 个可以）。所以炮塔/炮弹只能作为造型并进 `Orb`，三块面板合并成 `Menu`。当前 9 个类型 |
+| 克隆总数 | 300 | 常驻克隆（积分球 136 颗）要算进预算，长跑时不能再无脑销毁重建 |
+| 一个 classfile | 只能一个顶层 `var` 块 | 变量必须集中声明 |
+| 相机 | 自带平滑（每帧追平剩余 16%） | 一切屏幕对齐要用 `viewportRect()` + 等相机落地 |
+
+## 7. 构建与校验管线
+
+| 脚本 | 作用 |
+|---|---|
+| `scripts/build-ground.py` | 解析 `main.spx` 矩形表 → 生成 `Ground.svg`（楼顶 + 立面 + 悬挂楼板 + 终点信标） |
+| `scripts/build-background.py` | 生成 `level-background.svg`（黄昏天空 + 三层城市 + 雾带 + 霓虹） |
+| `scripts/build-audio.py` | 合成 7 个音效 + 8 秒循环 BGM（纯标准库） |
+| `scripts/build-ui-assets.py` | 生成 HUD 面板与三个菜单面板（文字转矢量路径，避免缺字） |
+| `scripts/test-level.py` | 关卡几何断言 + 自动跳跃机器人跑完全程 + 相机取景 |
+
+## 8. AI 协作方式（可复盘）
+
+- **测量驱动**：所有"玄学"问题都先量化。例如相机平滑是用打印 `viewportRect()` 与 `Camera.xpos`
+  的差值测出来的（每帧追平 16%），黑罩抖动、音频被裁切也都是这样定位的。
+- **单一真源 + 脚本化**：没有任何手改的生成物；改参数 → 重跑脚本 → 跑校验，三步闭环。
+- **每步可交付**：每个功能一个提交 + 实测数据写进 `docs/ENGINE-NOTES.md`，避免同类坑重复踩。
+- **人机分工**：AI 负责实现、量化、写文档与自检；视觉与手感由人实机验收并给出方向性反馈。

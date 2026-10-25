@@ -1,0 +1,152 @@
+// 追逐者：一颗品红色的球形无人机，中间是白底椭圆眼白 + 品红圆形眼珠。
+//
+// 规则：正常跑动时它会稳定吊在身后约 700px（正好是视口左边缘），停下来就会被吃掉；
+// 一旦被甩出摄像头窗口，立刻加速追回视线内。所有速度变化都走"加速度 + 惯性"，
+// 不会瞬移。
+// 被碰到 = 直接判死（广播 "caught"，交给 Player 统一处理）。
+
+var (
+    hoverY float64
+    vel float64
+    trailTick int
+    bitTick int
+    outTicks int
+    surgeTicks int
+    baseSpeed float64
+    lastY float64
+    phase string
+)
+
+func resetChaser() {
+    // 开局出现在画面靠左、垂直居中：相机跟随玩家，视口中心就是世界 y=0
+    setXYpos Player.xpos - 520, 0
+    hoverY = 0
+    vel = 0
+    trailTick = 0
+    bitTick = 0
+    outTicks = 0
+    surgeTicks = 0
+    lastY = 0
+    baseSpeed = 14.0
+    vel = 14.0
+    phase = "chase"
+    setSize 1.35
+    setGraphicEffect GhostEffect, 0
+    show
+}
+
+// 基础追击速度：开局与玩家跑速（14）持平，然后每帧缓慢衰减，最低到 12
+// （比玩家慢 2）。这样持续跑就会被慢慢甩开，不会卡在窗口边缘。
+func targetSpeed() float64 {
+    if baseSpeed > 12.0 {
+        baseSpeed = baseSpeed - 0.008
+    }
+    return baseSpeed
+}
+
+func hitsPlayer() bool {
+    dx := xpos - Player.xpos
+    dy := hoverY - (Player.ypos + 57)
+    if dx < 0 {
+        dx = -dx
+    }
+    if dy < 0 {
+        dy = -dy
+    }
+    return dx < 58 && dy < 96
+}
+
+// 四段状态机，避免"目标点在移动导致冲刺永远收不了尾"这类坑：
+//   chase  正常追击：速度 14 起，缓慢衰减到 12（比玩家慢 2）
+//   out    整体出界：停住不动，等约 0.6 秒
+//   dash   冲回画面：瞄准"左边缘往里 60px"，按剩余距离给速度
+//   surge  逼近：以 26（比玩家快 12）快速压上来，到 470px 就收，不会贴脸
+func fly() {
+    left, _, _, _ := Camera.viewportRect()
+    gap := Player.xpos - xpos
+    if phase == "chase" {
+        // 巡航速度从 14 缓慢衰减到 10（比玩家慢 4）。
+        // 之前衰减到 12（只慢 2）时，无人机在屏幕上的相对位移接近 0，
+        // 固定步长与刷新率不同步造成的抖动会显得像"卡顿"。
+        if baseSpeed > 10.0 {
+            baseSpeed = baseSpeed - 0.012
+        }
+        vel = vel + (baseSpeed - vel) * 0.12
+        if xpos < left - 70 {
+            phase = "out"
+            outTicks = 0
+            vel = 0
+        }
+    } else if phase == "out" {
+        vel = 0
+        outTicks++
+        if outTicks >= 30 {
+            phase = "dash"
+        }
+    } else if phase == "dash" {
+        remain := left + 60 - xpos
+        if remain <= 0 {
+            phase = "surge"
+            surgeTicks = 120
+            vel = 26.0
+        } else {
+            v := remain * 0.35
+            if v > 95 { v = 95 }
+            if v < 30 { v = 30 }
+            vel = v
+        }
+    } else {
+        surgeTicks--
+        if gap <= 470 || surgeTicks <= 0 {
+            // 到距离（或超时）就收手，交回 chase 慢慢减速，不贴脸
+            phase = "chase"
+        } else {
+            // 逼近速度 26，比玩家快 12，肉眼能明显看出在往前扑
+            vel = vel + (26.0 - vel) * 0.30
+        }
+    }
+    // 垂直：向玩家胸口高度收拢；冲刺时俯冲，靠近时也稍微下压
+    pullY := 0.055
+    if phase == "dash" {
+        pullY = 0.24
+    } else if gap < 320 {
+        pullY = 0.14
+    }
+    hoverY = hoverY + ((Player.ypos + 57) - hoverY) * pullY
+    setXYpos xpos + vel, hoverY
+    // 尾焰：按运动方向决定朝哪边喷
+    dyy := hoverY - lastY
+    fast := phase == "dash"
+    if dyy > 0.4 {
+        Fx.trail xpos, hoverY, "trailUp"
+        if fast { Fx.trail xpos, hoverY, "trailUp" }
+    } else if dyy < -0.4 {
+        Fx.trail xpos, hoverY, "trailDown"
+        if fast { Fx.trail xpos, hoverY, "trailDown" }
+    } else {
+        Fx.trail xpos, hoverY, "trailFlat"
+        if fast { Fx.trail xpos, hoverY, "trailFlat" }
+    }
+    bitTick++
+    if bitTick >= 2 {
+        bitTick = 0
+        Fx.bit xpos, hoverY
+    }
+    lastY = hoverY
+    if hitsPlayer() {
+        broadcast "caught"
+    }
+}
+
+onMsg "resetChaser", => { resetChaser }
+
+onStart => {
+    hide
+    resetChaser
+    for {
+        wait 0.02
+        if state == "playing" {
+            fly
+        }
+    }
+}

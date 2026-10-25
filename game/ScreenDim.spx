@@ -1,0 +1,21 @@
+// Opaque stage veil. It slides in from the left edge, parks dead centre and
+// then STAYS parked for as long as a menu is open: the stage underneath is
+// never revealed while the menu is up. Only the stage script may dismiss it,
+// and only after the menu is already gone.
+// Draw order is fixed by assets/index.json (below the menus, above the stage).
+onStart => {
+    for {
+        wait 0.02
+        // viewportRect() is the real (already smoothed) visible rect, while
+        // Camera.xpos() only reports the target the camera is still gliding to.
+        // Anchoring to the viewport keeps the veil glued to the screen even
+        // while the camera flies from one end of the level to the other.
+        left, top, width, height := Camera.viewportRect()
+        setXYpos left + width / 2 + wipeX, -top - height / 2
+        setSize 1 / cameraZoom
+        if dimOpacity > 0.1 {
+            setGraphicEffect GhostEffect, 100 - dimOpacity
+            show
+        } else { hide }
+    }
+}

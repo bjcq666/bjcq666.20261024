@@ -1,0 +1,41 @@
+{
+  "heading": 90,
+  "x": 0,
+  "y": 0,
+  "size": 1,
+  "rotationStyle": "normal",
+  "physicsMode": "no",
+  "visible": false,
+  "collisionShapeType": "none",
+  "collisionShapeParams": [],
+  "costumeIndex": 0,
+  "costumes": [
+    {
+      "name": "orb",
+      "path": "orb.svg",
+      "x": 14,
+      "y": 14,
+      "bitmapResolution": 1,
+      "imageWidth": 28,
+      "imageHeight": 28
+    },
+    {
+      "name": "base",
+      "path": "base.svg",
+      "x": 40,
+      "y": 40,
+      "bitmapResolution": 1,
+      "imageWidth": 80,
+      "imageHeight": 80
+    },
+    {
+      "name": "bullet",
+      "path": "bullet.svg",
+      "x": 18,
+      "y": 18,
+      "bitmapResolution": 1,
+      "imageWidth": 36,
+      "imageHeight": 36
+    }
+  ]
+}

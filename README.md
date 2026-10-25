@@ -1,106 +1,92 @@
 # 疾风行者 · Neon Dash
 
-> 一款使用 **XBuilder（spx 引擎）** 制作的赛博霓虹风 2D 横向跑酷游戏。
+> 用 **XBuilder（spx 引擎）** 做的赛博霓虹风 2D 楼顶跑酷：在霓虹都市的摩天楼顶之间跳跃，身后一颗球形无人机紧追不舍。
 
 [![XBuilder](https://img.shields.io/badge/XBuilder-spx-blue)](https://x.qiniu.com)
-[![XGo](https://img.shields.io/badge/XGo-1.7+-teal)](https://xgo.dev)
+[![XGo](https://img.shields.io/badge/XGo-classfile-teal)](https://xgo.dev)
 [![spx](https://img.shields.io/badge/spx-4.0-orange)](https://github.com/goplus/spx)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-## 🎮 简介
+## 🎮 玩什么
 
-《疾风行者》是一款横版无限跑酷游戏：在霓虹闪烁的赛博都市里，你操控一名疾行者向前奔跑，跳跃、滑铲、二段跳，躲避迎面而来的障碍，收集能量，挑战更高分数与更快速度。
+你操控一名火柴人在 **13 500px 的楼顶赛道**上前进：跳过楼与楼之间的空隙、别一头撞上悬挂楼板，同时提防身后那颗会俯冲的无人机。
 
-- **自动奔跑**：角色持续向前，玩家专注「何时跳、何时滑、何时做动作」。
-- **三档操作**：跳跃 / 滑铲 / 二段跳，组合出流畅的跑酷节奏。
-- **动态难度**：速度随距离递增，障碍组合逐渐复杂。
-- **Combo 连击**：连续收集能量触发加成，鼓励冒险。
-- **Juice 手感**：屏幕震动、速度线、粒子、飘分、音效，强化速度感。
-- **多阶段视觉**：背景与配色随进度切换（黎明 → 霓虹 → 深夜）。
+- **手动操作**：左右移动带惯性，跳跃 + 二段跳（松手再按才算第二段），没有自动奔跑。
+- **楼顶地形**：13 栋楼顶 + 7 个房顶小屋、12 条楼间空隙（423~545px，其中 8 条必须二段跳），楼顶高度按 5 档台阶起伏；掉下去即死亡。
+- **积分球**：白色圆形，5 个 3×3 / 5×5 方阵悬在楼顶上方，每颗 +10 分。
+- **炮塔**：3 座楼顶炮塔，炮管跟着你转，进画面才开火；被炮弹打中或撞上炮塔都扣 25 血，撞上会把炮塔拆掉。
+- **追逐者**：品红球体无人机贴着背后追，被甩出画面后停半秒再猛冲回来，然后以 26px/tick 逼近到约 450px 处；撞上即死。
+- **手感**：起跳扬尘 / 落地烟尘 / 坠亡爆散粒子、受击与坠亡的镜头抖动、受伤时四周泛红的暗角、8 个原创合成音效 + 8 秒循环合成器 BGM。
+- **转场**：进入菜单时同色系渐变遮罩从左滑入并**常驻遮住舞台**，菜单消失后遮罩才滑出；舞台重建完全发生在遮罩之后，看不到任何重置过程。开机第一帧就是遮罩，不会露出舞台。
 
 ## 🕹️ 操作
 
 | 操作 | 按键 |
 |---|---|
-| 跳跃 / 二段跳 | `Space` / `↑` |
-| 滑铲 | `↓` |
-| 冲刺（可选） | `Shift` |
-| 暂停 / 重开 | `P` / `R` |
+| 左右移动 | `←` / `→` |
+| 跳跃 / 二段跳 | `↑` / `Space`（松开再按第二次） |
+| 暂停 / 继续 | `ESC` |
+| 暂停 → 主菜单 | `Q` |
+| 死亡/通关后重开 | `R` |
+| 结算 → 主菜单 | `M` |
+| 主菜单开始游戏 | `Space` 或点击面板 |
 
-## 🚀 快速开始
+## 🚀 本地运行
 
-### 在线试玩
-
-> Web 构建部署后补充链接（GitHub Pages / WASM）。
-
-### 本地运行
-
-环境要求：macOS / Linux（Windows 用 Git Bash），已安装 **Go ≥ 1.19** 与 **Homebrew**。
+需要 Go 环境与 spx（`go install github.com/goplus/spx/v4/cmd/spx@latest`）：
 
 ```bash
-# 1) 安装 XGo 编译器
-brew install xgo
-
-# 2) 克隆并编译 spx 引擎，下载运行时
-git clone https://github.com/goplus/spx.git
-cd spx
-go install -v ./...
-export PATH="$HOME/go/bin:$PATH"          # 建议加入 ~/.zshrc 或 ~/.bash_profile
-buildctl setup host --published-runtime   # 下载 Godot 运行时（约 150MB）
-
-# 3) 运行游戏
-cd <本仓库>/game
-spx run         # 解释执行（最快，秒级启动）
-spx runnative   # 原生 PC 运行时（更流畅）
+cd game
+spx run          # 解释执行，秒级启动
 ```
 
-### 在 XBuilder 中打开
+无窗口的编译/启动冒烟检查：
 
-1. 访问 [x.qiniu.com](https://x.qiniu.com) 并登录；
-2. 新建项目，或把本仓库 `game/` 目录打包为 `.xbp`（zip 改后缀）导入；
-3. 在 XBuilder 编辑器中可视化编辑 / 预览 / 发布。
+```bash
+cd game && spx run -headless -v      # 只看有没有编译错误，注意跑完要手动结束运行时进程
+```
 
 ## 📁 项目结构
 
 ```
 .
-├── README.md                 # 本文件
-├── ARCHITECTURE.md           # 架构设计（模块规格、分工）
-├── PLAN.md                   # 项目规划与方向
-├── game/                     # spx 游戏工程（核心）
-│   ├── main.spx              # 舞台 / Game
-│   ├── Player.spx            # 主角
-│   ├── Obstacle.spx          # 障碍
-│   ├── Coin.spx              # 能量
-│   ├── Background.spx        # 视差背景
-│   ├── builder-meta.json
-│   └── assets/               # 素材（index.json、贴图、音效）
-├── scripts/                  # 构建 / 运行 / 导出脚本
-├── docs/                     # 文档（GAMEPLAY / AI_PROCESS / ASSETS）
-└── .github/                  # PR / Issue 模板
+├── README.md
+├── ARCHITECTURE.md          # 模块规格、数据流、关键不变量
+├── PLAN.md                  # 进度与后续方向
+├── docs/
+│   ├── LEVEL.md             # 关卡几何、碰撞、校验方式
+│   ├── UI.md                # 镜头、HUD、菜单与黑罩转场、音频
+│   ├── ENGINE-NOTES.md      # 实测出来的 spx 引擎行为与踩坑记录
+│   └── ASSETS.md            # 素材来源、授权、生成脚本
+├── game/                    # spx 工程
+│   ├── main.spx             # 舞台：关卡表、相机、状态机、转场
+│   ├── Player.spx           # 火柴人：输入、物理、动画、死亡
+│   ├── Chaser.spx           # 追逐者：四段状态机
+│   ├── Fx.spx               # 粒子总控（5 种造型的克隆池）
+│   ├── AudioCue.spx         # 音效发射器（贴着相机）
+│   ├── ScreenDim.spx        # 转场黑罩
+│   ├── Start/Pause/Gameover.spx
+│   ├── Ground.spx           # 地形美术（碰撞在 main.spx）
+│   └── assets/              # index.json、造型、音效、字体
+├── scripts/                 # 全部美术/音频/校验脚本（可复现）
+└── previews/                # 动画与背景预览
 ```
 
 ## 🛠️ 技术栈
 
-- **引擎**：[spx](https://github.com/goplus/spx) — Scratch 兼容的 2D 游戏引擎
-- **语言**：[XGo](https://xgo.dev) — XGo classfile（`.spx`）
-- **编辑器**：[XBuilder](https://x.qiniu.com)
-- **部署**：Web（WASM）+ GitHub Pages
+- **引擎** [spx](https://github.com/goplus/spx)（Scratch 兼容 2D 引擎）
+- **语言** XGo classfile（`.spx`，编译期严格：单 `var` 块、函数须写在事件处理器之前、没有 `break`）
+- **素材** 全部程序化生成：地形与背景是脚本生成的 SVG，音效与 BGM 是 Python 现场合成，**无第三方音频/位图**
+- **角色素材** TheRealGi 火柴人（作者宽泛许可，见 `docs/ASSETS.md`）
 
 ## 🧑‍💻 开发流程
 
-- **每个变更走 PR**：`feat/xxx`、`fix/xxx` 分支 → PR → Squash 合并；
-- **提交规范**：[Conventional Commits](https://www.conventionalcommits.org/)（`feat:` / `fix:` / `docs:` / `chore:`）；
-- **版本**：`v0`（初始化）→ 后续阶段性 tag；
-- **过程留痕**：Issue / PR / commit 全保留。
+- 每个变更走 feature 分支 → PR → 合并，提交信息用 [Conventional Commits](https://www.conventionalcommits.org/)；
+- 改关卡几何后必须跑 `python3 scripts/test-level.py`（校验跳跃包线、可达性、相机取景）；
+- 程序化素材改完要重跑对应 `scripts/build-*.py`，仓库里的产物是**可复现的生成结果**；
+- 引擎侧的坑记录在 `docs/ENGINE-NOTES.md`，改代码前先看一眼能省很多时间。
 
 ## 📄 素材与授权
 
-- 游戏素材来源与授权见 `docs/ASSETS.md`（待补充）。
-- 代码以 MIT 协议开源（见 `LICENSE`，待补充）。
-
-## 🙏 致谢
-
-- [goplus/spx](https://github.com/goplus/spx) — 游戏引擎
-- [XBuilder](https://x.qiniu.com) — 创作平台
-- [Kenney](https://kenney.nl) 及其他 CC0 素材来源（如使用会标注）
+- 火柴人素材：TheRealGi《2D Stickman Character》，作者声明可自由用于游戏与原型，详见 `docs/ASSETS.md`；
+- 场景美术与全部音频：本项目脚本生成，随代码一起发布；
+- 字体：从 XBuilder 测试工程导出，许可证待补核。

@@ -1,0 +1,113 @@
+{
+  "heading": 90,
+  "x": 0,
+  "y": 0,
+  "size": 1,
+  "rotationStyle": "normal",
+  "physicsMode": "no",
+  "visible": false,
+  "collisionShapeType": "none",
+  "collisionShapeParams": [],
+  "costumeIndex": 10,
+  "costumes": [
+    {
+      "name": "hp0",
+      "path": "hp0.svg",
+      "x": 800,
+      "y": 600,
+      "bitmapResolution": 1,
+      "imageWidth": 1600,
+      "imageHeight": 1200
+    },
+    {
+      "name": "hp10",
+      "path": "hp10.svg",
+      "x": 800,
+      "y": 600,
+      "bitmapResolution": 1,
+      "imageWidth": 1600,
+      "imageHeight": 1200
+    },
+    {
+      "name": "hp20",
+      "path": "hp20.svg",
+      "x": 800,
+      "y": 600,
+      "bitmapResolution": 1,
+      "imageWidth": 1600,
+      "imageHeight": 1200
+    },
+    {
+      "name": "hp30",
+      "path": "hp30.svg",
+      "x": 800,
+      "y": 600,
+      "bitmapResolution": 1,
+      "imageWidth": 1600,
+      "imageHeight": 1200
+    },
+    {
+      "name": "hp40",
+      "path": "hp40.svg",
+      "x": 800,
+      "y": 600,
+      "bitmapResolution": 1,
+      "imageWidth": 1600,
+      "imageHeight": 1200
+    },
+    {
+      "name": "hp50",
+      "path": "hp50.svg",
+      "x": 800,
+      "y": 600,
+      "bitmapResolution": 1,
+      "imageWidth": 1600,
+      "imageHeight": 1200
+    },
+    {
+      "name": "hp60",
+      "path": "hp60.svg",
+      "x": 800,
+      "y": 600,
+      "bitmapResolution": 1,
+      "imageWidth": 1600,
+      "imageHeight": 1200
+    },
+    {
+      "name": "hp70",
+      "path": "hp70.svg",
+      "x": 800,
+      "y": 600,
+      "bitmapResolution": 1,
+      "imageWidth": 1600,
+      "imageHeight": 1200
+    },
+    {
+      "name": "hp80",
+      "path": "hp80.svg",
+      "x": 800,
+      "y": 600,
+      "bitmapResolution": 1,
+      "imageWidth": 1600,
+      "imageHeight": 1200
+    },
+    {
+      "name": "hp90",
+      "path": "hp90.svg",
+      "x": 800,
+      "y": 600,
+      "bitmapResolution": 1,
+      "imageWidth": 1600,
+      "imageHeight": 1200
+    },
+    {
+      "name": "hp100",
+      "path": "hp100.svg",
+      "x": 800,
+      "y": 600,
+      "bitmapResolution": 1,
+      "imageWidth": 1600,
+      "imageHeight": 1200
+    }
+  ]
+}

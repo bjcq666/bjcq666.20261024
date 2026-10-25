@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2600" height="1800" viewBox="0 0 2600 1800">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#0c1a2e"/>
+<stop offset="0.42" stop-color="#091524"/>
+<stop offset="0.78" stop-color="#060d18"/>
+<stop offset="1" stop-color="#03070e"/>
+</linearGradient>
+<radialGradient id="halo" cx="16%" cy="50%" r="46%">
+<stop offset="0" stop-color="#3fe0f0" stop-opacity="0.12"/>
+<stop offset="1" stop-color="#3fe0f0" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="glow" cx="84%" cy="54%" r="50%">
+<stop offset="0" stop-color="#ff0263" stop-opacity="0.16"/>
+<stop offset="0.55" stop-color="#ff0263" stop-opacity="0.06"/>
+<stop offset="1" stop-color="#ff0263" stop-opacity="0"/>
+</radialGradient>
+</defs>
+<polygon points="-600,0 3200,0 2900,1800 -900,1800" fill="url(#sky)"/>
+<polygon points="-600,0 3200,0 2900,1800 -900,1800" fill="url(#halo)"/>
+<polygon points="-600,0 3200,0 2900,1800 -900,1800" fill="url(#glow)"/>
+<g opacity="0.35">
+<rect x="-600" y="1712" width="3800" height="2" fill="#3fe0f0" fill-opacity="0.18"/>
+<rect x="-600" y="88" width="3800" height="2" fill="#ff0263" fill-opacity="0.14"/>
+</g>
+</svg>

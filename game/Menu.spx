@@ -1,0 +1,50 @@
+import "fmt"
+
+// 菜单面板：开始 / 暂停 / 结算三块面板合成一个精灵，靠造型区分。
+//
+// 合成的原因：精灵类型有硬上限（11 个就启动失败，见 docs/ENGINE-NOTES.md），
+// 三块面板行为完全一样（都一样居中、一样按 menuOpacity 淡入淡出），没必要各占一个类。
+//
+// 结算（死亡 / 通关）时用 say 把"本局得分 / 死亡次数"念出来 —— 文字由引擎绘制，
+// 不需要额外精灵类型，也不需要把数字烘进图片里。
+
+onStart => {
+    hide
+    for {
+        wait 0.02
+        left, top, width, height := Camera.viewportRect()
+        setXYpos left + width / 2, -top - height / 2
+        setSize 1.3 / cameraZoom
+        if activeMenu == "menu" {
+            setCostume "start"
+            setGraphicEffect GhostEffect, 100 - menuOpacity
+            show
+            say ""
+        } else if activeMenu == "paused" {
+            setCostume "pause"
+            setGraphicEffect GhostEffect, 100 - menuOpacity
+            show
+            say ""
+        } else if activeMenu == "dead" || activeMenu == "won" {
+            setCostume "gameover"
+            setGraphicEffect GhostEffect, 100 - menuOpacity
+            show
+            if menuOpacity > 40 {
+                orbs := score / 10
+                if activeMenu == "won" {
+                    say "通关！积分 " + fmt.Sprintf("%d", orbs) + " 颗（" + fmt.Sprintf("%d", score) + " 分）  死亡 " + fmt.Sprintf("%d", deaths) + " 次"
+                } else {
+                    say "积分 " + fmt.Sprintf("%d", orbs) + " 颗（" + fmt.Sprintf("%d", score) + " 分）  距离 " + fmt.Sprintf("%d", distance) + "  死亡 " + fmt.Sprintf("%d", deaths) + " 次"
+                }
+            }
+        } else {
+            hide
+            say ""
+        }
+    }
+}
+
+onClick => {
+    if uiBusy { return }
+    if state == "menu" { broadcast "start" }
+}
