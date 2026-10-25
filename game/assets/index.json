@@ -1,19 +1,19 @@
 {
 	"backdrops": [
 		{
-			"x": 240,
-			"y": 180,
+			"x": 480,
+			"y": 360,
 			"bitmapResolution": 1,
 			"name": "neon",
 			"path": "backdrop.svg",
-			"imageWidth": 480,
-			"imageHeight": 360
+			"imageWidth": 960,
+			"imageHeight": 720
 		}
 	],
 	"backdropIndex": 0,
 	"map": {
-		"width": 480,
-		"height": 360,
+		"width": 960,
+		"height": 720,
 		"mode": "fillRatio"
 	},
 	"physics": false,
@@ -22,14 +22,14 @@
 	"audioAttenuation": 0,
 	"audioMaxDistance": 768,
 	"run": {
-		"width": 480,
-		"height": 360
+		"width": 960,
+		"height": 720
 	},
 	"camera": {
 		"on": ""
 	},
 	"stretchMode": true,
-	"windowScale": 2,
+	"windowScale": 1,
 	"zorder": [
 		{
 			"type": "monitor",
@@ -40,8 +40,8 @@
 			"color": 15629590,
 			"label": "分数",
 			"mode": 1,
-			"x": -210,
-			"y": 170,
+			"x": -470,
+			"y": 340,
 			"visible": true
 		},
 		{
@@ -53,8 +53,8 @@
 			"color": 15629590,
 			"label": "时间",
 			"mode": 1,
-			"x": -30,
-			"y": 170,
+			"x": -55,
+			"y": 340,
 			"visible": true
 		},
 		{
@@ -66,8 +66,8 @@
 			"color": 15629590,
 			"label": "生命",
 			"mode": 1,
-			"x": 170,
-			"y": 170,
+			"x": 365,
+			"y": 340,
 			"visible": true
 		},
 		"Obstacle",

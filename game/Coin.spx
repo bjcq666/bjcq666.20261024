@@ -1,4 +1,4 @@
-// 疾风行者 · 能量（Coin）
+// 疾风行者 · 能量（Coin） 960×720
 // 仅在 playing 状态生成与移动；暂停时冻结
 
 onStart => {
@@ -12,17 +12,17 @@ onStart => {
 }
 
 onCloned => {
-	setXYpos 260, float64(rand(-120, -40))
+	setXYpos 520, float64(rand(-240, -80))
 	show
 	for {
 		wait 0.02
 		if state == "playing" {
-			changeXpos -9 * gameSpeed * slowMul
+			changeXpos -18 * gameSpeed * slowMul
 			if touching("Player") {
 				broadcast "coin"
 				destroy
 			}
-			if xpos <= -230 {
+			if xpos <= -470 {
 				destroy
 			}
 		}

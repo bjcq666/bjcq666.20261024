@@ -1,4 +1,4 @@
-// 疾风行者 · 主角（Player）
+// 疾风行者 · 主角（Player） 960×720
 // 跳跃 / 滑铲 / 碰撞扣命 + 1 秒无敌闪烁 / 菜单与暂停控制
 
 var (
@@ -10,11 +10,11 @@ func jump() {
 	if onGround {
 		onGround = false
 		for i := 0; i < 9; i++ {
-			changeYpos 14
+			changeYpos 28
 			wait 0.02
 		}
 		for i := 0; i < 9; i++ {
-			changeYpos -14
+			changeYpos -28
 			wait 0.02
 		}
 		onGround = true
@@ -22,9 +22,9 @@ func jump() {
 }
 
 func slide() {
-	setSize 0.35
+	setSize 0.7
 	wait 0.35
-	setSize 0.6
+	setSize 1.2
 }
 
 func blink() {
@@ -39,7 +39,7 @@ func blink() {
 onStart => {
 	onGround = true
 	invincible = false
-	setXYpos -150, -100
+	setXYpos -300, -200
 	for {
 		wait 0.02
 		if state == "playing" && !invincible && touching("Obstacle") {

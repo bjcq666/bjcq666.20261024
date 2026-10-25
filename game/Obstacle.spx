@@ -1,4 +1,4 @@
-// 疾风行者 · 障碍（Obstacle）
+// 疾风行者 · 障碍（Obstacle） 960×720
 // 仅在 playing 状态生成与移动；暂停时冻结
 
 onStart => {
@@ -12,13 +12,13 @@ onStart => {
 }
 
 onCloned => {
-	setXYpos 260, -100
+	setXYpos 520, -200
 	show
 	for {
 		wait 0.02
 		if state == "playing" {
-			changeXpos -9 * gameSpeed * slowMul
-			if xpos <= -230 {
+			changeXpos -18 * gameSpeed * slowMul
+			if xpos <= -470 {
 				destroy
 			}
 		}

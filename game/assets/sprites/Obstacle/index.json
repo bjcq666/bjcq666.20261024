@@ -1,8 +1,8 @@
 {
 	"heading": 90,
-	"x": 300,
-	"y": -100,
-	"size": 0.8,
+	"x": 520,
+	"y": -200,
+	"size": 1.6,
 	"rotationStyle": "normal",
 	"physicsMode": "no",
 	"costumeIndex": 0,
