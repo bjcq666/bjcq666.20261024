@@ -36,9 +36,11 @@ func startJump() {
         jumpsUsed++
         if jumpsUsed == 1 {
             vy = 22
+            play "jump"
         } else {
             // 二段跳重新施加上冲速度，不累加，保持高度可控。
             vy = 20
+            play "doublejump"
         }
         onGround = false
         airTicks = 0
@@ -103,7 +105,10 @@ onStart => {
             }
             setYpos nextY
             if landed {
-                if !onGround { landingTicks = 1 }
+                if !onGround {
+                    landingTicks = 1
+                    play "land"
+                }
                 vy = 0
                 onGround = true
                 jumpsUsed = 0
@@ -111,6 +116,7 @@ onStart => {
                 onGround = false
             }
             if ypos < deathY {
+                play "death"
                 health = 0
                 lives = 0
                 openMenu "dead"

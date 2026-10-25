@@ -221,6 +221,7 @@ onStart => {
     Camera.setZoom cameraZoom
     Camera.setXYpos levelStart + 80 / cameraZoom, 0
     refreshHUD
+    play "bgm", true
     openMenu "menu"
     for {
         wait 0.02
@@ -232,11 +233,19 @@ onStart => {
         }
     }
 }
-onMsg "start", => { if state == "menu" && !uiBusy { resumePlay true } }
-onMsg "restart", => { if !uiBusy && (state == "dead" || state == "won") { resumePlay true } }
+onMsg "start", => { if state == "menu" && !uiBusy { play "select"; resumePlay true } }
+onMsg "restart", => { if !uiBusy && (state == "dead" || state == "won") { play "select"; resumePlay true } }
 onMsg "pause", => {
     if !uiBusy {
-        if state == "playing" { openMenu "paused" } else if state == "paused" { resumePlay false }
+        if state == "playing" {
+            play "select"
+            pausePlaying "bgm"
+            openMenu "paused"
+        } else if state == "paused" {
+            play "select"
+            resumePlaying "bgm"
+            resumePlay false
+        }
     }
 }
 onMsg "toMenu", => {
@@ -244,6 +253,7 @@ onMsg "toMenu", => {
 }
 onMsg "finish", => {
     if state == "playing" {
+        play "finish"
         distance = levelLength
         score = distance
         if score > best { best = score }
