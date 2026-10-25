@@ -47,8 +47,7 @@ spx 是 Scratch 兼容引擎，代码是 XGo classfile：
 | 变量 | 说明 |
 |---|---|
 | `levelLength = 13500` / `levelStart = -6750` | 关卡区间，进度 = `xpos - levelStart` |
-| `blockLeft/Right/Top` | 12 栋楼的矩形表（碰撞 + 美术的唯一真源） |
-| `ceilingLeft/Right/Bottom/Top` | 6 组悬挂楼板 |
+| `blockLeft/Right/Top` | 13 栋楼顶 + 7 个房顶小屋的矩形表（碰撞 + 美术的唯一真源） |
 | `state` | `menu` / `playing` / `paused` / `dead` / `won` / `transition` |
 | `uiBusy` | 转场互斥锁，期间忽略所有输入 |
 | `wipeX` / `dimOpacity` / `veilScale` | 黑罩的水平偏移 / 不透明度 / 厚度倍率 |

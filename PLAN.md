@@ -149,3 +149,5 @@ spx run 本地快速测试 → 迭代 → 打包导回 → 发布 / 录视频
 3. **个人还是团队**？（决定分工文档写法）
 4. **部署方式**：本地演示 vs Web（推荐 Web，可分享）
 5. **主题 / 美术风格**：赛博霓虹 / 像素 / 卡通风？
+
+- 演示视频：[Release v1.0-demo-video](https://github.com/bjcq666/bjcq666.20261024/releases/tag/v1.0-demo-video)（540p，约 2 分钟）

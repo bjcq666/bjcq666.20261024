@@ -6,9 +6,19 @@
 [![XGo](https://img.shields.io/badge/XGo-classfile-teal)](https://xgo.dev)
 [![spx](https://img.shields.io/badge/spx-4.0-orange)](https://github.com/goplus/spx)
 
+## 🎬 演示视频
+
+[![Demo](https://img.shields.io/badge/▶_观看-Demo_视频-ff0263)](https://github.com/bjcq666/bjcq666.20261024/releases/tag/v1.0-demo-video)
+
+- 在线观看 / 下载：**[Release v1.0-demo-video](https://github.com/bjcq666/bjcq666.20261024/releases/tag/v1.0-demo-video)**
+- 直链：[demo-540p.mp4](https://github.com/bjcq666/bjcq666.20261024/releases/download/v1.0-demo-video/demo-540p.mp4)（540p / 约 2 分钟 / 58MB）
+- 内容：开始菜单 → 楼顶跑酷（二段跳跨空隙、吃积分球）→ 炮塔交火与受伤暗角 → 被无人机追上 → 结算与重开
+
+> 视频以 Release 附件形式托管，不进入 git 历史，所以 `git clone` 不会被它拖慢。
+
 ## 🎮 玩什么
 
-你操控一名火柴人在 **13 500px 的楼顶赛道**上前进：跳过楼与楼之间的空隙、别一头撞上悬挂楼板，同时提防身后那颗会俯冲的无人机。
+你操控一名火柴人在 **13 500px 的楼顶赛道**上前进：跳过楼与楼之间的空隙、跳上或越过楼顶小屋、顺手吃掉白色积分球，同时提防楼顶炮塔和身后那颗会俯冲的无人机。
 
 - **手动操作**：左右移动带惯性，跳跃 + 二段跳（松手再按才算第二段），没有自动奔跑。
 - **楼顶地形**：13 栋楼顶 + 7 个房顶小屋、12 条楼间空隙（423~545px，其中 8 条必须二段跳），楼顶高度按 5 档台阶起伏；掉下去即死亡。

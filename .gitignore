@@ -10,3 +10,7 @@ Thumbs.db
 # 构建产物
 build/
 dist/
+.DS_Store
+demo-video/
+*.mov
+
