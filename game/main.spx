@@ -17,6 +17,10 @@ var (
     orbRoof = []float64{4, 5, 9, 10, 11}
     orbSize = []float64{5, 3, 5, 3, 5}
     orbSpawned bool
+    turretSpawned bool
+    // 炮塔挂在第几栋楼顶、相对楼顶中点的横向偏移
+    turretRoof = []float64{4, 9, 11}
+    turretOffX = []float64{170, -170, 150}
     distance int
     simulationTicks int
     debugLevel = false
@@ -29,7 +33,6 @@ var (
     wipeX float64
     maskUp bool
     hudShown = true  // the monitor starts visible (assets/index.json)
-    shakeTicks int
     activeMenu string
     score int
     best int
@@ -49,15 +52,8 @@ func refreshHUD() {
 
 // 镜头目标位置 + 受击/坠亡抖动。抖动只改相机目标点，几帧内自然衰减回 0。
 func updateCamera() {
-    sx := 0.0
-    sy := 0.0
-    if shakeTicks > 0 {
-        shakeTicks--
-        sx = float64(rand(-7, 8)) * 1.6
-        sy = float64(rand(-5, 6)) * 1.3
-    }
     // 人物位于视口水平40%。
-    Camera.setXYpos Player.xpos + 80 / cameraZoom + sx, sy
+    Camera.setXYpos Player.xpos + 80 / cameraZoom, 0
 }
 
 // ---------------------------------------------------------------------------
@@ -72,6 +68,26 @@ func updateCamera() {
 // Hence: the camera must never move fast while anything is visible. A big
 // teleport is therefore split into small hops (see glideCameraHome).
 // ---------------------------------------------------------------------------
+
+// 立刻抖镜头若干帧。死亡/受击时 state 会马上变成 transition，
+// Player 的主循环不再调用 updateCamera，所以不能指望那边的抖动逻辑。
+func shakeCamera(n int) {
+    // 相机是平滑跟随的（每帧只追平剩余距离的 16%），所以抖动的"目标点"必须给得
+    // 又远又保持几帧，屏幕才真的会位移；只给 ±10px 会被平滑完全吃掉。
+    for i := 0; i < n; i++ {
+        dx := 110.0
+        if i % 4 >= 2 {
+            dx = -110.0
+        }
+        dy := 70.0
+        if i % 2 == 0 {
+            dy = -70.0
+        }
+        Camera.setXYpos Player.xpos + 80 / cameraZoom + dx, dy
+        wait 0.02
+    }
+    Camera.setXYpos Player.xpos + 80 / cameraZoom, 0
+}
 
 // Hold until the camera has finished its glide, so that whatever is revealed
 // afterwards shows a still world. The gap decays ~16% per tick, so this settles
@@ -119,6 +135,17 @@ func glideCameraHome() {
     waitCameraStill
 }
 
+// 放炮塔：只在第一次放，炮台本身不销毁
+func spawnTurrets() {
+    if turretSpawned { return }
+    turretSpawned = true
+    for i := 0; i < len(turretRoof); i++ {
+        r := int(turretRoof[i])
+        cx := (blockLeft[r] + blockRight[r]) / 2 + turretOffX[i]
+        Orb.placeAt cx, blockTop[r] + 36
+    }
+}
+
 // 重新铺积分球方阵（每次重建舞台都重来一遍）
 func spawnOrbs() {
     if orbSpawned {
@@ -146,11 +173,12 @@ func resetStage() {
     lives = 100
     elapsed = 0
     simulationTicks = 0
-    shakeTicks = 0
     broadcastAndWait "resetPlayer"
     broadcast "resetChaser"
     // 相机由 glideCameraHome 分跳带回来，这里不直接甩目标点
     spawnOrbs
+    spawnTurrets
+    broadcast "resetTurrets"
     refreshHUD
 }
 

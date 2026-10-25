@@ -22,6 +22,7 @@ func land() { play "land" }
 func death() { play "death" }
 func finish() { play "finish" }
 func confirm() { play "select" }
+func hurt() { play "hurt" }
 func musicOn() { play "bgm", true }
 func musicPause() { pausePlaying "bgm" }
 func musicResume() { resumePlaying "bgm" }

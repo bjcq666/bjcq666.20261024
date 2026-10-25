@@ -176,6 +176,13 @@ def sfx_finish():
     return fade_out(out, 0.1)
 
 
+def sfx_hurt():
+    out = buf(0.26)
+    add(out, decay(osc("saw", 300, 0.24, sweep=0.45, vib=0.04, vib_hz=18), 9, hold=0.01), gain=0.8)
+    add(out, decay(noise(0.12, smooth=0.5), 30), gain=0.35)
+    return fade_out(out, 0.04)
+
+
 def sfx_select():
     out = buf(0.10)
     add(out, decay(osc("square", 900, 0.08, sweep=1.2), 40, hold=0.002), gain=0.6)
@@ -249,6 +256,7 @@ def main():
     save("death", sfx_death())
     save("finish", sfx_finish())
     save("select", sfx_select())
+    save("hurt", sfx_hurt())
     save("bgm", bgm())
 
 

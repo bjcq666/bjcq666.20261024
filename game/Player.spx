@@ -1,6 +1,7 @@
 // 火柴人：TheRealGi PNG 动画；姿态与位移解耦，下蹲已取消。
 // 50Hz 模拟。Jump 1..21 用于飞行，22..40 用于落地恢复，不回放旧帧。
 var (
+    hurtCd int
     vx float64
     vy float64
     onGround bool
@@ -55,6 +56,9 @@ onStart => {
     for {
         wait 0.02
         jumpNow = keyPressed(KeyUp) || keyPressed(KeySpace)
+        if hurtCd > 0 {
+            hurtCd--
+        }
         if state == "playing" {
             // 只响应按下沿：必须松开再按，长按不消耗两次机会。
             if jumpNow && !jumpHeld { startJump }
@@ -113,7 +117,7 @@ onStart => {
             if ypos < deathY {
                 AudioCue.death
                 Fx.burst xpos, ypos, 18
-                shakeTicks = 12
+                shakeCamera 10
                 health = 0
                 lives = 0
                 openMenu "dead"
@@ -160,11 +164,27 @@ onStart => {
 }
 
 onMsg "resetPlayer", => { resetPlayer }
+onMsg "hurt", => {
+    if state == "playing" && hurtCd == 0 {
+        hurtCd = 8
+        health = health - 25
+        AudioCue.hurt
+        Fx.burst xpos, ypos + 57, 6
+        shakeCamera 8
+        if health <= 0 {
+            health = 0
+            lives = 0
+            broadcast "caught"
+        }
+    }
+}
 onMsg "caught", => {
     if state == "playing" {
+        // 立刻锁住玩法状态：抖动要跑几帧，这期间不能再被撞第二次
+        state = "transition"
         AudioCue.death
         Fx.burst xpos, ypos + 60, 20
-        shakeTicks = 14
+        shakeCamera 12
         health = 0
         lives = 0
         openMenu "dead"

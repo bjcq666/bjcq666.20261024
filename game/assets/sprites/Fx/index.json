@@ -54,6 +54,15 @@
       "bitmapResolution": 1,
       "imageWidth": 10,
       "imageHeight": 10
+    },
+    {
+      "name": "trailRight",
+      "path": "spark.svg",
+      "x": 5,
+      "y": 5,
+      "bitmapResolution": 1,
+      "imageWidth": 10,
+      "imageHeight": 10
     }
   ]
 }

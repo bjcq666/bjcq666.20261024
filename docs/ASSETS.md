@@ -16,7 +16,7 @@
 
 ## 音频（全部原创合成）
 
-- 7 个音效与 1 段循环 BGM 全部由 `scripts/build-audio.py` 用 Python 标准库现场合成（正弦/方波/锯齿 + 噪声 + 包络），**不含任何第三方音频样本**，不需要额外的素材授权。
+- 8 个音效与 1 段循环 BGM 全部由 `scripts/build-audio.py` 用 Python 标准库现场合成（正弦/方波/锯齿 + 噪声 + 包络），**不含任何第三方音频样本**，不需要额外的素材授权。
 - 采样规格：22050Hz、单声道、16bit，与 spx 的 `assets/sounds/<name>/index.json`（`path/rate/sampleCount`）一致；音效按目录名查找，不需要在 `assets/index.json` 注册。
 
 | 名字 | 用途 | 长度 |
@@ -27,6 +27,7 @@
 | `death` | 坠亡 | 0.85s |
 | `finish` | 通关 | 0.90s |
 | `select` | 菜单确认 | 0.10s |
+| `hurt` | 受击 / 撞毁炮塔 | 0.26s |
 | `bgm` | 循环背景music（120BPM，4 小节 Am-F-C-G） | 8.00s |
 
 - 重生成：`python3 scripts/build-audio.py`。改动合成参数后要重新生成并一起提交，仓库里的 wav 是可复现产物。

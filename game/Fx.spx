@@ -35,6 +35,7 @@ func bit(x float64, y float64) {
 //   "trailUp"   无人机在上升 → 尾焰朝左下
 //   "trailDown" 无人机在下落 → 尾焰朝左上
 //   "trailFlat" 平飞         → 尾焰朝左
+//   "trailRight" 向左飞      → 尾焰朝右
 func trail(x float64, y float64, mode string) {
     setCostume mode
     setXYpos x, y
@@ -83,6 +84,11 @@ onCloned => {
         spray
     } else if kind == "trailFlat" {
         pvx = float64(rand(-8, -3))
+        pvy = float64(rand(-2, 3))
+        spray
+    } else if kind == "trailRight" {
+        // 向左飞的物体（比如炮塔弹丸）尾焰朝右
+        pvx = float64(rand(2, 8))
         pvy = float64(rand(-2, 3))
         spray
     } else {

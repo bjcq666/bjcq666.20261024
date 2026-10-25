@@ -34,7 +34,7 @@ spx 是 Scratch 兼容引擎，代码是 XGo classfile：
 | **AudioCue** | `AudioCue.spx` | 唯一音效发射源，贴着相机视口中心 | `play` / `pausePlaying` / `resumePlaying` |
 | **ScreenDim** | `ScreenDim.spx` | 转场黑罩，钉在屏幕上，`veilScale` 决定厚度 | `wipeX`、`dimOpacity`、`veilScale` |
 | **Start / Pause / Gameover** | 三个 `.spx` | 菜单面板，屏幕居中 + `GhostEffect` 淡入淡出 | `activeMenu`、`menuOpacity` |
-| **Orb** | `Orb.spx` | 积分球克隆池：方阵布点、吃到判定、重开复位 | `main.spx` 的 `orbRoof/orbSize` |
+| **Orb（道具）** | `Orb.spx` | 3 个造型共用一个类：积分球（`orb`）/ 炮塔（`base`）/ 炮弹（`bullet`），靠 `costumeName` 分流 | `main.spx` 的 `orbRoof/orbSize/turretRoof`、`Player`、`Fx` |
 | **Ground** | `Ground.spx` | 只负责绘图，不含逻辑 | `Ground.svg` |
 | **HUD** | `assets/index.json` 的 Monitor | 原生 UI 层，显示 `hudText` | `refreshHUD()` |
 
@@ -62,7 +62,9 @@ spx 是 Scratch 兼容引擎，代码是 XGo classfile：
 | `pause` | `ESC` | Game | 暂停 ↔ 继续（继续走 `resumePlay(false)`，不重置） |
 | `toMenu` | `Q` / `M` | Game | 切到主菜单（黑罩已在位，不再滑入） |
 | `finish` | Player 到达终点 | Game | 结算 |
-| `caught` | Chaser 撞到玩家 | Player | 死亡序列（音效、粒子、抖动、开结算） |
+| `caught` | Chaser 撞到玩家 / 血量归零 | Player | 死亡序列（先锁 `state`，再音效/粒子/抖动/开结算） |
+| `hurt` | 炮弹命中、撞毁炮塔 | Player | 扣 25 血（8 帧冷却）、`hurt` 音效、抖动；归零转 `caught` |
+| `resetOrbs` / `resetTurrets` | `resetStage()` | Orb | 只复位对应造型的克隆（`taken/dead = false` + `show`） |
 | `resetPlayer` / `resetChaser` | `resetStage()` | Player / Chaser | 舞台重建时各自复位 |
 
 ### 4.3 转场时序（唯一允许的重建窗口）
@@ -87,13 +89,15 @@ resumePlay(rebuild):
    `setLayer Front` 抢层（四个精灵互相抢会变成执行顺序决定层级）。
 4. **UI 用 `viewportRect()` 定位**：`Camera.xpos` 是目标位置，相机平滑飞行时会把 UI 甩出屏幕。
 5. **音效只从 `AudioCue` 发射**，且 `audioMaxDistance` 必须远大于地图宽度，否则会被 2D 距离裁切。
+6. **持久道具用 hide 而不是 destroy**：积分球、炮塔都是常驻克隆，用掉后 `hide`，
+   重开时广播复位。若"销毁 + 重建"，上一局残留 + 新建会顶到克隆上限 300，部分道具静默不生成。
 
 ## 6. 引擎硬限制（决定了很多实现细节）
 
 | 限制 | 数值 | 影响 |
 |---|---|---|
 | 单张纹理边长 | 16384px | 地图宽 + 两侧余量必须 < 16384，所以关卡长度上限约 15000 |
-| classfile 反射方法表 | 2560 | 精灵类型不能随便加（每个类都复制整套 API），必须合并复用造型 |
+| classfile 反射方法表 | 2560 | **实测 11 个精灵类型就会启动失败**（10 个可以）。所以炮塔/炮弹只能作为造型并进 `Orb`，不能新建类文件 |
 | 克隆总数 | 300 | 常驻克隆（积分球 136 颗）要算进预算，长跑时不能再无脑销毁重建 |
 | 一个 classfile | 只能一个顶层 `var` 块 | 变量必须集中声明 |
 | 相机 | 自带平滑（每帧追平剩余 16%） | 一切屏幕对齐要用 `viewportRect()` + 等相机落地 |

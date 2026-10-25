@@ -1,35 +1,60 @@
-// 积分球：白色圆形，按 3×3 / 5×5 的方阵悬在楼顶上方。
+// 场景道具：白球积分 + 楼顶炮塔 + 炮弹，全都在这一个精灵里。
 //
-// 克隆池只铺一次（main.spx 的 spawnOrbs 用 orbSpawned 保证），之后每次重建舞台
-// 只让已有小球复位：吃到时不 destroy，而是 hide + 标记，复位时再 show。
-// 这样处理是因为克隆总数有上限（300）：一场跑下来如果销毁再重建，
-// 上一局没吃掉的还在、新的又要生成，就会顶到上限，部分小球不出现。
+// 为什么挤在一个精灵里：XGo classfile 每个精灵类都会把整套引擎 API 复制进自己的
+// 反射方法表，容量 2560。项目加到 11 个精灵类型就启动失败（见 docs/ENGINE-NOTES.md），
+// 所以炮塔只能作为"造型 + 分支"塞进已有的 Orb 里，而不是新建类文件。
 //
-// 只占一个精灵类型（方法表预算紧张，炮塔还要留位置）。
+// 三个造型 / 三条逻辑，靠 costumeName 分流：
+//   orb     积分球：悬在楼顶上方，玩家靠近就 +10 分并隐藏
+//   base    炮塔：跟着玩家转炮管，看得见玩家才开火；被撞就炸毁并让玩家扣 25 血
+//   bullet  炮弹：朝开火瞬间的玩家位置直线飞，带尾焰，命中广播 "hurt"
+//
+// 克隆池只铺一次：积分球和炮塔被"用掉"时只是 hide，重开时广播复位，不再 clone。
+// 这样克隆总数恒定，不会顶到引擎的 300 上限。
 
 var (
     spin float64
     taken bool
+    dead bool
+    cd int
+    bvx float64
+    bvy float64
+    life int
+    kind string
 )
+
+// ---- 积分球 ----
 
 // x,y 是方阵中心，cols 是边长（3 或 5），step 是格间距
 func spawnGrid(x float64, y float64, cols int, step float64) {
     half := float64(cols - 1) / 2.0
     for i := 0; i < cols; i++ {
         for j := 0; j < cols; j++ {
+            setCostume "orb"
             setXYpos x + (float64(i) - half) * step, y + (float64(j) - half) * step
             clone
         }
     }
+    setCostume "orb"
 }
 
-onMsg "resetOrbs", => {
-    taken = false
-    setGraphicEffect GhostEffect, 0
-    show
+// ---- 炮塔 ----
+
+func placeAt(x float64, y float64) {
+    setCostume "base"
+    setXYpos x, y
+    clone
+    setCostume "orb"
 }
 
-onCloned => {
+// 玩家是否在画面里（炮塔只在看得见的时候才开火）
+func playerOnScreen() bool {
+    left, _, width, _ := Camera.viewportRect()
+    px := Player.xpos
+    return px > left - 80 && px < left + width + 80
+}
+
+func runOrb() {
     taken = false
     spin = 0
     setSize 1
@@ -54,6 +79,100 @@ onCloned => {
                 }
             }
         }
+    }
+}
+
+func runBullet() {
+    life = 150
+    show
+    for life > 0 {
+        setXYpos xpos + bvx, ypos + bvy
+        // 尾焰朝飞行方向的反方向喷
+        if bvx < 0 {
+            Fx.trail xpos, ypos, "trailRight"
+        } else {
+            Fx.trail xpos, ypos, "trailFlat"
+        }
+        life--
+        wait 0.02
+        dx := xpos - Player.xpos
+        dy := ypos - (Player.ypos + 57)
+        if dx < 0 { dx = -dx }
+        if dy < 0 { dy = -dy }
+        if dx < 30 && dy < 58 {
+            broadcast "hurt"
+            destroy
+            return
+        }
+        left, _, width, _ := Camera.viewportRect()
+        if xpos < left - 200 || xpos > left + width + 200 {
+            destroy
+            return
+        }
+    }
+    destroy
+}
+
+func runTurret() {
+    cd = 20
+    dead = false
+    setCostume "base"
+    show
+    for {
+        wait 0.02
+        if state == "playing" && !dead {
+            turnTo Player
+            dx := xpos - Player.xpos
+            dy := ypos - (Player.ypos + 57)
+            if dx < 0 { dx = -dx }
+            if dy < 0 { dy = -dy }
+            if dx < 46 && dy < 74 {
+                dead = true
+                Fx.burst xpos, ypos, 14
+                broadcast "hurt"
+                hide
+            } else {
+                cd++
+                dist := Player.xpos - xpos
+                if dist < 0 { dist = -dist }
+                if cd > 45 && dist < 1100 && playerOnScreen() {
+                    cd = 0
+                    bvx = (Player.xpos - xpos) / 18.0
+                    bvy = ((Player.ypos + 57) - ypos) / 18.0
+                    setCostume "bullet"
+                    clone
+                    setCostume "base"
+                }
+            }
+        }
+    }
+}
+
+onMsg "resetOrbs", => {
+    if costumeName == "orb" {
+        taken = false
+        setGraphicEffect GhostEffect, 0
+        show
+    }
+}
+
+onMsg "resetTurrets", => {
+    if costumeName == "base" {
+        dead = false
+        cd = 20
+        setGraphicEffect GhostEffect, 0
+        show
+    }
+}
+
+onCloned => {
+    kind = costumeName
+    if kind == "base" {
+        runTurret
+    } else if kind == "bullet" {
+        runBullet
+    } else {
+        runOrb
     }
 }
 
