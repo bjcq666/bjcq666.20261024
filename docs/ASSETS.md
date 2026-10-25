@@ -31,6 +31,13 @@
 
 - 重生成：`python3 scripts/build-audio.py`。改动合成参数后要重新生成并一起提交，仓库里的 wav 是可复现产物。
 
+## 程序生成的场景美术
+
+- `game/assets/level-background.svg`（城市天际线）和 `game/assets/sprites/Ground/Ground.svg`（楼顶地形）都不是手绘文件，而是由脚本按固定随机种子生成，改完后重跑脚本即可复现：
+  - `python3 scripts/build-background.py`（天空/三层城市/雾/霓虹）
+  - `python3 scripts/build-ground.py`（把 main.spx 的碰撞矩形表画成楼顶与立面，表必须与 main.spx 一致）
+- 两者都是纯几何图形 + 渐变，无位图、无第三方素材，随仓库代码许可发布。
+
 ## 自制原型素材
 
 原有几何图形角色、背景、菜单为项目原型制作。旧角色SVG目前不再注册。
