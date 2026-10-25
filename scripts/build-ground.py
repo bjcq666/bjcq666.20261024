@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Generate Ground.svg: the rooftop level the player runs across.
 
-The player stands on top of skyscrapers, so every collision block from
-main.spx becomes a building: parapet at the collision height, facade with lit
-windows falling away below, neon strips on the corners. The four pits are the
-gaps between buildings, where the background city shows through.
+Every collision block from main.spx becomes a building: parapet at the collision
+height, facade with lit windows falling away below, neon strips on the corners.
+The gaps between blocks are the alleys, where the background city shows through.
+
+The block/ceiling tables are **parsed out of main.spx**, so the artwork can never
+drift away from the collision data. main.spx stays the single source of truth;
+re-run this script after editing it.
 
 Canvas is 12400x1000 with the costume pivot at (6200, 300), so image space maps
 to world space as:
@@ -12,27 +15,20 @@ to world space as:
     imgX = worldX + 6200
     imgY = 300 - worldY          (world y=-208 -> img 508, y=-78 -> img 378)
 
-Keep this table identical to main.spx (blockLeft/blockRight/blockTop); the
-collision and the artwork must come from one source of truth.
-
 Usage: python3 scripts/build-ground.py
 """
 import os
 import random
+import re
+from pathlib import Path
 
 IMG_W, IMG_H = 12400, 1000
 X_OFFSET = 6200
 Y_ORIGIN = 300
 
-BLOCK_LEFT = [-6600, -5400, -4750, -3950, -3080, -2350, -1450, -800, 120, 850,
-              1450, 2200, 2920, 3900, 4700, 5600]
-BLOCK_RIGHT = [-5400, -4750, -3950, -3480, -2350, -1450, -800, -200, 850, 1450,
-               2200, 2920, 3500, 4700, 5250, 6600]
-BLOCK_TOP = [-208, -118, -208, -78, -168, -208, -98, -208, -138, -208, -108,
-             -208, -148, -208, -88, -208]
-
-HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(HERE, "game", "assets", "sprites", "Ground", "Ground.svg")
+ROOT = Path(__file__).resolve().parents[1]
+MAIN = ROOT / "game" / "main.spx"
+OUT = ROOT / "game" / "assets" / "sprites" / "Ground" / "Ground.svg"
 
 FACADE = "#0a1320"
 FACADE_DARK = "#070d17"
@@ -42,13 +38,20 @@ CYAN = "#3fe0f0"
 MAGENTA = "#ff2e7e"
 
 
+def table(name):
+    src = MAIN.read_text()
+    m = re.search(name + r" = \[\]float64\{([^}]+)\}", src)
+    if not m:
+        raise SystemExit(f"{name} not found in main.spx")
+    return [float(v) for v in m.group(1).split(",")]
+
+
 def rect(x, y, w, h, fill, opacity=None):
     o = f' opacity="{opacity}"' if opacity is not None else ""
     return f'<rect x="{x:.0f}" y="{y:.0f}" width="{w:.0f}" height="{h:.0f}" fill="{fill}"{o}/>'
 
 
 def building(rnd, left, right, top):
-    """One block: parapet + facade + windows + neon, from `top` down to the bottom."""
     x0 = max(0, left + X_OFFSET)
     x1 = min(IMG_W, right + X_OFFSET)
     w = x1 - x0
@@ -56,16 +59,15 @@ def building(rnd, left, right, top):
         return []
 
     o = []
-    # facade body
     o.append(rect(x0, top, w, IMG_H - top, FACADE))
-    # parapet band, and the lit roof edge the player actually stands on
+    # parapet, with the lit roof edge the player actually stands on
     o.append(rect(x0, top, w, 16, PARAPET))
     o.append(rect(x0, top, w, 4, CYAN, 0.55))
     o.append(rect(x0, top + 16, w, 3, "#060b14"))
     # corner edges
     o.append(rect(x0, top, 4, IMG_H - top, EDGE, 0.5))
     o.append(rect(x1 - 4, top, 4, IMG_H - top, EDGE, 0.5))
-    # window grid
+    # window grid: mostly dark glass, a few lit
     cols = int((w - 40) // 34)
     rows = int((IMG_H - top - 60) // 52)
     for c in range(cols):
@@ -82,12 +84,12 @@ def building(rnd, left, right, top):
             else:
                 col, alpha = MAGENTA, 0.30
             o.append(rect(wx, wy, 12, 20, col, alpha))
-    # a neon tube down one corner of taller facades
+    # neon tube down one corner
     if w > 260 and rnd.random() < 0.7:
         nx = x0 + 14 if rnd.random() < 0.5 else x1 - 20
         col = CYAN if rnd.random() < 0.75 else MAGENTA
         o.append(rect(nx, top + 40, 4, IMG_H - top - 60, col, 0.35))
-    # low rooftop hardware near the corners: thin, so it never reads as a hazard
+    # low rooftop hardware near the corners: thin, never reads as a hazard
     if rnd.random() < 0.6:
         bw = min(90, max(30, int(w * 0.12)))
         bx = x0 + 26 if rnd.random() < 0.5 else x1 - bw - 26
@@ -100,15 +102,41 @@ def building(rnd, left, right, top):
     return o
 
 
+def ceiling(rnd, left, right, bottom, top):
+    """Hanging slab: obstacle the player must not jump into."""
+    x0 = max(0, left + X_OFFSET)
+    x1 = min(IMG_W, right + X_OFFSET)
+    w = x1 - x0
+    img_bottom = Y_ORIGIN - bottom      # world y of the slab's underside
+    img_top = Y_ORIGIN - top
+    h = img_bottom - img_top
+    if w <= 0 or h <= 0:
+        return []
+    o = [rect(x0, img_top, w, h, "#060b14")]
+    o.append(rect(x0, img_top, w, 3, EDGE, 0.55))
+    # hazard stripe along the underside
+    o.append(rect(x0, img_bottom - 6, w, 6, MAGENTA, 0.85))
+    for i in range(int(w // 26)):
+        o.append(rect(x0 + 12 + i * 26, img_bottom - 13, 10, 5, MAGENTA, 0.45))
+    return o
+
+
 def build():
     rnd = random.Random(1024)
-    body = []
-    for left, right, top in zip(BLOCK_LEFT, BLOCK_RIGHT, BLOCK_TOP):
-        body += building(rnd, left, right, 300 - top)
+    left = table("blockLeft")
+    right = table("blockRight")
+    top = table("blockTop")
 
-    # finish line: a beacon on the last roof edge
+    body = []
+    for l, r, t in zip(left, right, top):
+        body += building(rnd, l, r, Y_ORIGIN - t)
+    for l, r, b, t in zip(table("ceilingLeft"), table("ceilingRight"),
+                          table("ceilingBottom"), table("ceilingTop")):
+        body += ceiling(rnd, l, r, b, t)
+
+    # finish beacon on the last roof
     fx = 6000 + X_OFFSET - 40
-    fy = 300 - (-208)
+    fy = Y_ORIGIN - (-208)
     body.append(rect(fx, fy - 220, 5, 220, "#1b2f47"))
     body.append(f'<polygon points="{fx + 5},{fy - 220} {fx + 95},{fy - 196} {fx + 5},{fy - 172}" fill="{MAGENTA}" opacity="0.95"/>')
     body.append(rect(fx - 26, fy, 26, 6, MAGENTA, 0.9))
@@ -121,7 +149,7 @@ def main():
     svg = build()
     with open(OUT, "w") as f:
         f.write(svg)
-    print(f"{OUT}\n  {len(svg) / 1024:.1f} KiB")
+    print(f"{OUT}\n  {len(svg) / 1024:.1f} KiB, {svg.count('<rect')} rects")
 
 
 if __name__ == "__main__":

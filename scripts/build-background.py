@@ -62,9 +62,9 @@ def skyline(rnd, base, lo, hi, wlo, whi, gap, fill, opacity, antenna_chance=0.0,
         w = rnd.randint(wlo, whi)
         h = rnd.randint(lo, hi)
         if rnd.random() < 0.10:                       # landmark tower
-            h = int(h * rnd.uniform(1.2, 1.5))
+            h = int(h * rnd.uniform(1.25, 1.7))
         top = base - h
-        out.append(rect(x, top, w, h, fill, opacity))
+        out.append(rect(x, top, w, H - top, fill, opacity))
         if rnd.random() < antenna_chance and w > 70:
             ax = x + w * rnd.uniform(0.3, 0.7)
             ah = rnd.randint(24, 70)
@@ -155,11 +155,11 @@ def build():
     b.append(rect(0, 520, W, 320, "url(#glow)"))
 
     # far layer: palest, shortest, dissolving into mist
-    b += skyline(rnd, FAR_BASE, 140, 300, 90, 210, 12, FAR, 0.60, antenna_chance=0.25)
+    b += skyline(rnd, FAR_BASE, 150, 340, 90, 210, 12, FAR, 0.55, antenna_chance=0.25)
     b.append(rect(0, 640, W, 420, "url(#mist)"))
 
     # mid layer
-    b += skyline(rnd, MID_BASE, 230, 430, 80, 200, 16, MID, 1, antenna_chance=0.35,
+    b += skyline(rnd, MID_BASE, 240, 580, 80, 210, 16, MID, 1, antenna_chance=0.35,
                  windows=0.10)
     b.append(rect(0, 700, W, 340, "url(#mist)"))
 
@@ -181,7 +181,7 @@ def build():
     x = -80
     while x < W + 80:
         w = rnd.randint(320, 620)
-        h = rnd.randint(260, 470)
+        h = rnd.randint(300, 640)
         b += near_anchor(rnd, x, w, h)
         x += w + rnd.randint(420, 1100)
 
