@@ -221,7 +221,7 @@ onStart => {
     Camera.setZoom cameraZoom
     Camera.setXYpos levelStart + 80 / cameraZoom, 0
     refreshHUD
-    play "bgm", true
+    AudioCue.musicOn
     openMenu "menu"
     for {
         wait 0.02
@@ -233,17 +233,17 @@ onStart => {
         }
     }
 }
-onMsg "start", => { if state == "menu" && !uiBusy { play "select"; resumePlay true } }
-onMsg "restart", => { if !uiBusy && (state == "dead" || state == "won") { play "select"; resumePlay true } }
+onMsg "start", => { if state == "menu" && !uiBusy { AudioCue.confirm; resumePlay true } }
+onMsg "restart", => { if !uiBusy && (state == "dead" || state == "won") { AudioCue.confirm; resumePlay true } }
 onMsg "pause", => {
     if !uiBusy {
         if state == "playing" {
-            play "select"
-            pausePlaying "bgm"
+            AudioCue.confirm
+            AudioCue.musicPause
             openMenu "paused"
         } else if state == "paused" {
-            play "select"
-            resumePlaying "bgm"
+            AudioCue.confirm
+            AudioCue.musicResume
             resumePlay false
         }
     }
@@ -253,7 +253,7 @@ onMsg "toMenu", => {
 }
 onMsg "finish", => {
     if state == "playing" {
-        play "finish"
+        AudioCue.finish
         distance = levelLength
         score = distance
         if score > best { best = score }

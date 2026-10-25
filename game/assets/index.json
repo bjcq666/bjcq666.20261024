@@ -20,7 +20,7 @@
   "layerSortMode": "",
   "autoSetCollisionLayer": true,
   "audioAttenuation": 0,
-  "audioMaxDistance": 768,
+  "audioMaxDistance": 100000,
   "run": {
     "width": 1100,
     "height": 825
@@ -32,6 +32,7 @@
   "windowScale": 1,
   "zorder": [
     "Ground",
+    "AudioCue",
     "Player",
     "DebugBox",
     {

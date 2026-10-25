@@ -1,0 +1,35 @@
+// Sound board：游戏里所有音效都从这里发射，而不是从触发它的对象。
+//
+// 为什么要单独一个精灵：
+//   1. spx 用 AudioStreamPlayer2D 播放音效，参数取自工程配置
+//      （assets/index.json 的 audioAttenuation / audioMaxDistance）。
+//      原来 audioMaxDistance 是 768，而关卡跨度 12000px，相机在
+//      x=-6036..6036 之间跑，声音一旦离听者超过 768px 就被裁成静音。
+//      实测现象就是"开局一声、之后全哑"——相机路过原点的那零点几秒。
+//   2. 舞台级 play（main.spx 里直接 play）走的是另一条固定 2000px 的路径，
+//      同样会被裁掉，所以全部音效统一走这个精灵。
+//
+// 现在 audioMaxDistance 已经调到 100000（远大于整张地图），距离裁切不会再
+// 触发；这个精灵仍然贴着相机走，让发射点与听者重合，避免 2D panning 把声音
+// 甩到单侧声道。
+//
+// 注意：这个精灵必须在 assets/index.json 的 zorder 里。不在 zorder 里的精灵
+// 只会被加载成原型，不会被实例化成舞台精灵，它的 onStart 不会执行。
+
+func jump() { play "jump" }
+func doubleJump() { play "doublejump" }
+func land() { play "land" }
+func death() { play "death" }
+func finish() { play "finish" }
+func confirm() { play "select" }
+func musicOn() { play "bgm", true }
+func musicPause() { pausePlaying "bgm" }
+func musicResume() { resumePlaying "bgm" }
+
+onStart => {
+    for {
+        wait 0.02
+        left, top, width, height := Camera.viewportRect()
+        setXYpos left + width / 2, -top - height / 2
+    }
+}

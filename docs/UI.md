@@ -46,3 +46,14 @@
 
 - 关卡终点附近，世界边界（`keepInFence`）会限制黑罩往右滑出的距离，差 90px 左右滑不干净，所以滑出尾部带 4 帧淡出兜底。
 - 菜单与世界精灵都在相机坐标系里，没有原生 CanvasLayer/屏幕空间精灵可用；HUD 之所以固定是因为它是 Monitor。
+
+## 音频
+
+- 音效与 BGM 全部由 `scripts/build-audio.py` 现场合成，放在 `game/assets/sounds/<名字>/`
+  （`index.json` = `{path, rate, sampleCount}`，目录名即声音名，不用在 `assets/index.json` 注册）。
+- 所有音效统一由 `AudioCue` 精灵发射（它贴着相机视口中心），原因和踩坑过程见
+  `docs/ENGINE-NOTES.md` 的声音一节：spx 用 2D 定位音频，离听者超过 `audioMaxDistance`
+  会被裁成静音，而我们的关卡跨度 12000px。
+- `assets/index.json` 里 `audioMaxDistance` 调到 100000、`audioAttenuation` 保持 0。
+- 触发点：跳跃/二段跳/落地（`Player.spx`）、死亡（坠坑）、通关、菜单确认；
+  BGM 在开局循环播放，暂停菜单打开时 `pausePlaying`、恢复时 `resumePlaying`。
