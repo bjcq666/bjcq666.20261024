@@ -5,7 +5,6 @@
   "size": 1,
   "rotationStyle": "normal",
   "physicsMode": "no",
-  "costumeIndex": 0,
   "visible": true,
   "isDraggable": false,
   "collisionPivot": {
@@ -14,15 +13,15 @@
   },
   "collisionShapeType": "none",
   "collisionShapeParams": [],
+  "costumeIndex": 0,
   "costumes": [
     {
-      "x": 6200,
-      "y": 300,
-      "faceRight": 0,
-      "bitmapResolution": 1,
       "name": "default",
       "path": "Ground.svg",
-      "imageWidth": 12400,
+      "x": 7350,
+      "y": 300,
+      "bitmapResolution": 1,
+      "imageWidth": 14700,
       "imageHeight": 1000
     }
   ]

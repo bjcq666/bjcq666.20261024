@@ -1,0 +1,59 @@
+{
+  "heading": 90,
+  "x": 0,
+  "y": 0,
+  "size": 1,
+  "rotationStyle": "normal",
+  "physicsMode": "no",
+  "visible": false,
+  "collisionShapeType": "none",
+  "collisionShapeParams": [],
+  "costumeIndex": 0,
+  "costumes": [
+    {
+      "name": "spark",
+      "path": "spark.svg",
+      "x": 5,
+      "y": 5,
+      "bitmapResolution": 1,
+      "imageWidth": 10,
+      "imageHeight": 10
+    },
+    {
+      "name": "bit",
+      "path": "bit.svg",
+      "x": 6,
+      "y": 6,
+      "bitmapResolution": 1,
+      "imageWidth": 12,
+      "imageHeight": 12
+    },
+    {
+      "name": "trailUp",
+      "path": "spark.svg",
+      "x": 5,
+      "y": 5,
+      "bitmapResolution": 1,
+      "imageWidth": 10,
+      "imageHeight": 10
+    },
+    {
+      "name": "trailDown",
+      "path": "spark.svg",
+      "x": 5,
+      "y": 5,
+      "bitmapResolution": 1,
+      "imageWidth": 10,
+      "imageHeight": 10
+    },
+    {
+      "name": "trailFlat",
+      "path": "spark.svg",
+      "x": 5,
+      "y": 5,
+      "bitmapResolution": 1,
+      "imageWidth": 10,
+      "imageHeight": 10
+    }
+  ]
+}

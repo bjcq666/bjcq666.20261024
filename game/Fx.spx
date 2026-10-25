@@ -1,0 +1,115 @@
+// 粒子总控：起跳扬尘、落地烟、坠亡爆散、追逐者的方向性尾焰、尾焰白方块。
+//
+// 全部用克隆池实现，靠"本体先挪到发射点、再 clone"传递位置（克隆继承本体位置，
+// 不用全局变量，避免连续两次爆发互相覆盖参数的竞态）。
+//
+// 五种行为由造型区分：克隆继承本体的造型，onCloned 里按 costumeName 分支。
+// 合并成一个精灵是为了压住 XGo classfile 的方法表上限（每个精灵类都会把整套 API
+// 复制进自己的方法表，精灵类型太多会超限）。
+
+var (
+    life int
+    pvx float64
+    pvy float64
+    spin float64
+    kind string
+)
+
+// 起跳/落地/坠亡的碎屑
+func burst(x float64, y float64, count int) {
+    setCostume "spark"
+    setXYpos x, y
+    for i := 0; i < count; i++ {
+        clone
+    }
+}
+
+// 尾焰里的白色小方块
+func bit(x float64, y float64) {
+    setCostume "bit"
+    setXYpos x, y
+    clone
+}
+
+// 方向性尾焰：mode 决定朝哪边喷
+//   "trailUp"   无人机在上升 → 尾焰朝左下
+//   "trailDown" 无人机在下落 → 尾焰朝左上
+//   "trailFlat" 平飞         → 尾焰朝左
+func trail(x float64, y float64, mode string) {
+    setCostume mode
+    setXYpos x, y
+    clone
+}
+
+// 尾焰粒子的共同过程：速度衰减、越飘越小、越来越透明
+func spray() {
+    life = 11 + rand(0, 6)
+    setSize 0.55 + float64(rand(0, 4)) * 0.14
+    setGraphicEffect GhostEffect, 0
+    show
+    for life > 0 {
+        pvx = pvx * 0.92
+        pvy = pvy * 0.92
+        setXYpos xpos + pvx, ypos + pvy
+        setSize 0.15 + float64(life) / 17.0 * 0.5
+        setGraphicEffect GhostEffect, float64(100 - life * 7)
+        life--
+        wait 0.02
+    }
+    destroy
+}
+
+onCloned => {
+    kind = costumeName
+    if kind == "bit" {
+        setXYpos xpos + float64(rand(-16, 17)), ypos + float64(rand(-22, 23))
+        life = 16
+        setGraphicEffect GhostEffect, 0
+        show
+        for life > 0 {
+            setSize 0.25 + float64(life) / 16.0 * 0.9
+            setGraphicEffect GhostEffect, float64(88 - life * 5)
+            life--
+            wait 0.02
+        }
+        destroy
+    } else if kind == "trailUp" {
+        pvx = float64(rand(-7, -2))
+        pvy = float64(rand(-6, -1))
+        spray
+    } else if kind == "trailDown" {
+        pvx = float64(rand(-7, -2))
+        pvy = float64(rand(1, 7))
+        spray
+    } else if kind == "trailFlat" {
+        pvx = float64(rand(-8, -3))
+        pvy = float64(rand(-2, 3))
+        spray
+    } else {
+        setXYpos xpos + float64(rand(-8, 9)), ypos + float64(rand(0, 9))
+        pvx = float64(rand(-6, 7))
+        pvy = float64(rand(1, 8))
+        if rand(0, 2) == 0 {
+            pvx = -pvx
+        }
+        spin = float64(rand(-4, 5))
+        life = 14 + rand(0, 10)
+        setSize 0.7 + float64(rand(0, 5)) * 0.12
+        setHeading Direction(rand(0, 360))
+        show
+        for life > 0 {
+            pvx = pvx * 0.90
+            pvy = pvy - 0.7
+            setXYpos xpos + pvx, ypos + pvy
+            turn spin
+            setGraphicEffect GhostEffect, float64(100 - life * 4)
+            life--
+            wait 0.02
+        }
+        destroy
+    }
+}
+
+onStart => {
+    hide
+}

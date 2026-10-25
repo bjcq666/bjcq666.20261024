@@ -26,7 +26,10 @@ Usage: python3 scripts/build-background.py
 import os
 import random
 
-W, H = 13600, 1400
+import json as _json
+_CFG = _json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                     "game", "assets", "index.json")))
+W, H = int(_CFG["map"]["width"]), 1400      # 与 map 同尺寸，避免露边
 FAR_BASE = 980
 MID_BASE = 900
 NEAR_BASE = 850
@@ -195,10 +198,12 @@ def build():
 
 
 def main():
+    # 单张纹理上限 16384：这张图跟 map 同宽（15000），还在上限内
+    assert W < 16384, f"backdrop {W}px exceeds the 16384 texture limit"
     svg = build()
     with open(OUT, "w") as f:
         f.write(svg)
-    print(f"{OUT}\n  {len(svg) / 1024:.1f} KiB")
+    print(f"{OUT}\n  {len(svg) / 1024:.1f} KiB  ({W}x{H})")
 
     def variant(width, height, view):
         _, rest = svg.split(">", 1)

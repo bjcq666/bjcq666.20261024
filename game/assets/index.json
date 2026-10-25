@@ -1,18 +1,18 @@
 {
   "backdrops": [
     {
-      "x": 6800,
+      "x": 7500,
       "y": 700,
       "bitmapResolution": 1,
       "name": "level",
       "path": "level-background.svg",
-      "imageWidth": 13600,
+      "imageWidth": 15000,
       "imageHeight": 1400
     }
   ],
   "backdropIndex": 0,
   "map": {
-    "width": 13600,
+    "width": 15000,
     "height": 1400,
     "mode": "actualSize"
   },
@@ -34,7 +34,8 @@
     "Ground",
     "AudioCue",
     "Player",
-    "DebugBox",
+    "Fx",
+    "Chaser",
     {
       "type": "monitor",
       "name": "fixedHUD",

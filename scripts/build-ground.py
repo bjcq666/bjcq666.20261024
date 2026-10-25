@@ -12,7 +12,7 @@ re-run this script after editing it.
 Canvas is 12400x1000 with the costume pivot at (6200, 300), so image space maps
 to world space as:
 
-    imgX = worldX + 6200
+    imgX = worldX + X_OFFSET
     imgY = 300 - worldY          (world y=-208 -> img 508, y=-78 -> img 378)
 
 Usage: python3 scripts/build-ground.py
@@ -22,13 +22,24 @@ import random
 import re
 from pathlib import Path
 
-IMG_W, IMG_H = 12400, 1000
-X_OFFSET = 6200
-Y_ORIGIN = 300
-
 ROOT = Path(__file__).resolve().parents[1]
 MAIN = ROOT / "game" / "main.spx"
-OUT = ROOT / "game" / "assets" / "sprites" / "Ground" / "Ground.svg"
+
+
+def _level_span():
+    src = MAIN.read_text()
+    start = float(re.search(r"levelStart = (-?[\d.]+)", src).group(1))
+    length = float(re.search(r"levelLength = (\d+)", src).group(1))
+    return start, length
+
+
+_START, _LEN = _level_span()
+# 画布宽度 = 关卡长度 + 两侧各 600 余量，取偶数便于对半切
+IMG_W, IMG_H = int(_LEN + 1200) // 2 * 2, 1000
+X_OFFSET = IMG_W // 2
+Y_ORIGIN = 300
+SPRITES = ROOT / "game" / "assets" / "sprites" / "Ground"
+OUT = SPRITES / "Ground.svg"
 
 FACADE = "#0a1320"
 FACADE_DARK = "#070d17"
@@ -44,6 +55,23 @@ def table(name):
     if not m:
         raise SystemExit(f"{name} not found in main.spx")
     return [float(v) for v in m.group(1).split(",")]
+
+
+def level_end():
+    m = re.search(r"levelStart = (-?[\d.]+)", MAIN.read_text())
+    n = re.search(r"levelLength = (\d+)", MAIN.read_text())
+    return float(m.group(1)) + float(n.group(1))
+
+
+def last_roof():
+    tops = table("blockTop")
+    lefts = table("blockLeft")
+    rights = table("blockRight")
+    end = level_end()
+    for l, r, t in zip(lefts, rights, tops):
+        if l <= end - 40 <= r:
+            return t
+    return tops[-1]
 
 
 def rect(x, y, w, h, fill, opacity=None):
@@ -134,9 +162,10 @@ def build():
                           table("ceilingBottom"), table("ceilingTop")):
         body += ceiling(rnd, l, r, b, t)
 
-    # finish beacon on the last roof
-    fx = 6000 + X_OFFSET - 40
-    fy = Y_ORIGIN - (-208)
+    # finish beacon on the last roof, at the level end parsed from main.spx
+    end = level_end()
+    fy = Y_ORIGIN - last_roof()
+    fx = end + X_OFFSET - 40
     body.append(rect(fx, fy - 220, 5, 220, "#1b2f47"))
     body.append(f'<polygon points="{fx + 5},{fy - 220} {fx + 95},{fy - 196} {fx + 5},{fy - 172}" fill="{MAGENTA}" opacity="0.95"/>')
     body.append(rect(fx - 26, fy, 26, 6, MAGENTA, 0.9))
@@ -146,10 +175,12 @@ def build():
 
 
 def main():
+    # 单张纹理上限 16384：这张图 = 关卡长 + 两侧余量，还在上限内
+    assert IMG_W < 16384, f"ground {IMG_W}px exceeds the 16384 texture limit"
     svg = build()
     with open(OUT, "w") as f:
         f.write(svg)
-    print(f"{OUT}\n  {len(svg) / 1024:.1f} KiB, {svg.count('<rect')} rects")
+    print(f"{OUT}\n  {len(svg) / 1024:.1f} KiB, {svg.count('<rect')} rects ({IMG_W}x{IMG_H})")
 
 
 if __name__ == "__main__":

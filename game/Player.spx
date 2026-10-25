@@ -37,10 +37,12 @@ func startJump() {
         if jumpsUsed == 1 {
             vy = 22
             AudioCue.jump
+            Fx.burst xpos, ypos, 5
         } else {
             // 二段跳重新施加上冲速度，不累加，保持高度可控。
             vy = 20
             AudioCue.doubleJump
+            Fx.burst xpos, ypos, 8
         }
         onGround = false
         airTicks = 0
@@ -108,6 +110,7 @@ onStart => {
                 if !onGround {
                     landingTicks = 1
                     AudioCue.land
+                    Fx.burst xpos, ypos, 9
                 }
                 vy = 0
                 onGround = true
@@ -117,6 +120,8 @@ onStart => {
             }
             if ypos < deathY {
                 AudioCue.death
+                Fx.burst xpos, ypos, 18
+                shakeTicks = 12
                 health = 0
                 lives = 0
                 openMenu "dead"
@@ -163,6 +168,16 @@ onStart => {
 }
 
 onMsg "resetPlayer", => { resetPlayer }
+onMsg "caught", => {
+    if state == "playing" {
+        AudioCue.death
+        Fx.burst xpos, ypos + 60, 20
+        shakeTicks = 14
+        health = 0
+        lives = 0
+        openMenu "dead"
+    }
+}
 onKey KeySpace, => {
     if state == "menu" { broadcast "start" }
 }

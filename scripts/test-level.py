@@ -147,7 +147,10 @@ cfg = json.loads((ROOT / "game" / "assets" / "index.json").read_text())
 assert cfg["map"]["width"] >= LEVEL_LEN, "map must be at least as long as the level"
 for p in (ROOT / "game" / "assets").rglob("*.json"):
     json.loads(p.read_text())
-ET.parse(ROOT / "game" / "assets" / "sprites" / "Ground" / "Ground.svg")
+for name in ("Ground.svg", "level-background.svg"):
+    found = list((ROOT / "game" / "assets").rglob(name))
+    assert found, f"{name} missing"
+    ET.parse(found[0])
 print(f"map {cfg['map']['width']}x{cfg['map']['height']}, level {LEVEL_LEN:.0f}px")
 
 widest = max(g for _, _, g in gaps)
