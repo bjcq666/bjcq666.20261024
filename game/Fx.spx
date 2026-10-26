@@ -44,7 +44,7 @@ func trail(x float64, y float64, mode string) {
 
 // 尾焰粒子的共同过程：速度衰减、越飘越小、越来越透明
 func spray() {
-    life = 11 + rand(0, 6)
+    life = 11 + int(rand(0, 6))
     setSize 0.55 + float64(rand(0, 4)) * 0.14
     setGraphicEffect GhostEffect, 0
     show
@@ -95,13 +95,13 @@ onCloned => {
         setXYpos xpos + float64(rand(-8, 9)), ypos + float64(rand(0, 9))
         pvx = float64(rand(-6, 7))
         pvy = float64(rand(1, 8))
-        if rand(0, 2) == 0 {
+        if int(rand(0, 2)) == 0 {
             pvx = -pvx
         }
         spin = float64(rand(-4, 5))
-        life = 14 + rand(0, 10)
+        life = 14 + int(rand(0, 10))
         setSize 0.7 + float64(rand(0, 5)) * 0.12
-        setHeading Direction(rand(0, 360))
+        setHeading Direction(int(rand(0, 360)))
         show
         for life > 0 {
             pvx = pvx * 0.90

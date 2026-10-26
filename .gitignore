@@ -14,3 +14,10 @@ dist/
 demo-video/
 *.mov
 
+
+# XBuilder 等其它工具链的构建产物
+*.xbp
+game/project/
+game/go.mod
+game/go.sum
+game/xgo_autogen.go
